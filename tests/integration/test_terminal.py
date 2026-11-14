@@ -264,7 +264,7 @@ def test_bash_real_pty_persistence_resize_signals_and_cleanup(tmp_path: Path) ->
             b"printf 'unicode-'; printf '\\u96ea-\\u7d42\\n'; "
             b"printf 'MYCMD-UNICODE-'; printf 'END\\n'\n"
         )
-        assert "unicode-" + chr(38634) + "-" + chr(32042) in asyncio.run(
+        assert "unicode-" + chr(38634) + "-" + chr(0x7D42) in asyncio.run(
             read_until(session, "MYCMD-UNICODE-END")
         )
 
