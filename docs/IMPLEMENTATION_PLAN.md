@@ -23,6 +23,9 @@ Phase 0 is complete per user-confirmed local verification and passing Windows an
 Ubuntu CI jobs. Historical recovery instructions below are retained as an audit
 trail, not active prerequisites. Do not reinstall tooling or repeat Phase 0.
 
+Phase 1 is complete. CI run [43579616402](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43579616402)
+at commit `6d0128b7de0fe09b129e0a4093404ef956da03a5` completed successfully;
+both `python (windows-latest)` and `python (ubuntu-latest)` passed all workflow steps.
 Phase 1 is locally verified: shared domain validation, owner-scoped SQLite CRUD,
 revision checks, tombstones, transactional migrations/outbox, restart and interrupted
 transaction recovery, snapshot exports and validated atomic imports. Latest review:
@@ -32,9 +35,14 @@ wheel smoke passed. User's successful Hatchling 1.33.0 isolated build is also re
 in PROGRESS.md. The previous build blocker is resolved.
 
 CI now smoke-tests the wheel on Windows and Ubuntu after the existing verification
-gates. Phase 1 is ready for commit and GitHub CI; the new CI jobs have not run and no
-push is authorized. Phase 2 remains unstarted pending completion of Phase 1 CI
-verification. See DOMAIN_STORAGE.md for decisions and limitations.
+gates. Phase 1 commit and CI verification are complete. Phase 2 local verification is complete: 42 tests pass, Ruff formatting/lint and strict
+mypy pass, uv dependency check and offline lock check pass (26 packages), isolated
+sdist/wheel build passes, and installed-wheel CLI help/status passed in user-verified
+Windows CMD on Python 3.13.18 with 15 dependencies. Current source CLI smoke also passes
+for help/status and five entity list groups. Phase 2 is locally prepared for commit and
+cross-platform GitHub Actions verification; it is not complete until both Windows and
+Ubuntu CI jobs pass. See PROGRESS.md for evidence. See DOMAIN_STORAGE.md for storage
+decisions and limitations.
 
 ## Phase 0 tree
 

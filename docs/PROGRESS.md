@@ -1,6 +1,39 @@
 # MYCMD 2.0 progress
 
-## Current status ? Phase 1 locally verified; ready for commit and CI (2026-11-14)
+## Current status — Phase 1 complete; Phase 2 underway (2026-11-14)
+
+Phase 1 completed at commit `6d0128b7de0fe09b129e0a4093404ef956da03a5`.
+GitHub Actions run [43579616402](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43579616402)
+concluded success. Both `python (windows-latest)` and `python (ubuntu-latest)` jobs
+passed, including frozen lock, dependency check, Ruff, mypy, pytest, build and wheel
+smoke. This run was verified previously; no repeat API request was needed.
+
+Phase 2 verification update: `render` now declares `Iterable[Record]`; strict mypy
+passes. Ruff format check and lint pass; pytest reports **42 passed**. `git diff
+--check` passes (Git emitted only line-ending normalization warnings for existing
+working files). Using the installed uv executable outside the restricted sandbox,
+`uv lock --check --offline` resolved 26 packages and passed. `uv build --offline`
+created both sdist and wheel from the sdist successfully.
+
+Installed-wheel smoke subsequently passed in normal Windows CMD, as verified by the
+user: a fresh Python 3.13.18 environment was created, 15 dependencies installed,
+`mycmd.exe --help` printed plain borderless help, and `mycmd.exe status` listed all
+five entity categories with zero pending operations. The user's CMD output was
+summarized in their message rather than attached verbatim.
+
+Final local checks run in this workspace: uv `pip check` checked 26 installed packages
+and reported all compatible; uv `lock --check --offline` resolved 26 packages.
+Ruff formatting (16 files), Ruff lint, strict mypy (10 source files), and pytest
+(**42 passed, 0 failed**) passed. CLI smoke for root help, status, project help, and
+list commands for all five entity groups exited successfully against a fresh workspace
+database. `git diff --check` passed with line-ending normalization warnings only.
+The isolated offline source and wheel build passed earlier in this task; after the final CLI error-path and regression-test changes, uv rebuilt both artifacts successfully and the extracted-wheel smoke passed. CI for Phase 2
+has not run; prepare the changes for commit and Windows/Ubuntu CI, but do not call
+Phase 2 complete until both CI jobs pass. No push was made.
+
+Phase 2 CLI work is underway. The regression suite now checks Unicode border glyphs directly and verifies inaccessible database paths return concise plain-text errors without traceback panels. Typer `>=0.29.1` and Rich `>=15.0.0` are declared
+in pyproject.toml and uv.lock. Existing README.md and .gitignore edits were present
+before this task and are being preserved. CLI verification results will follow.
 
 The user confirmed a successful isolated build in normal Windows CMD using Hatchling
 1.33.0, producing `mycmd-2.0.0.dev0.tar.gz` and
