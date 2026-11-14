@@ -1,0 +1,26 @@
+name: foundation
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  python:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.12'
+      - uses: astral-sh/setup-uv@v6
+      # Fail closed until a real resolved lockfile has been generated and reviewed.
+      - run: uv lock --check
+      - run: uv sync --frozen --extra dev
+      - run: uv pip check
+      - run: uv run --frozen --extra dev ruff format --check .
+      - run: uv run --frozen --extra dev ruff check .
+      - run: uv run --frozen --extra dev mypy
+      - run: uv run --frozen --extra dev pytest -q
+      - run: uv run --frozen --extra dev python -m build
