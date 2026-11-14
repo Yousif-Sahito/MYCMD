@@ -1,8 +1,8 @@
 # Phase 3 — local terminal engine (verified)
 
 The Phase 3 implementation and expanded real-shell tests are committed on `main`
-at `2601d56873a79c32b61e5f5dee66bb77583eae71`. Windows and Ubuntu GitHub Actions
-run [43614734702](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43614734702)
+at `34566dd14c51f9425fe746cac3a061b7287db474`. Windows and Ubuntu GitHub Actions
+run [43615724564](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43615724564)
 passed both jobs. The user's pre-existing README and `.gitignore` edits remain
 separate and are preserved.
 
@@ -15,18 +15,18 @@ process-tree cleanup only after graceful exit times out. The Windows-only
 `pywinpty>=3.1.2` dependency is locked with a platform marker. Existing MYCMD
 application commands and SQLite architecture remain separate and unchanged.
 
-Windows 10 local evidence: full suite **52 passed, 5 platform/optional-shell
-tests skipped**; terminal tests contributed 10 passes. Windows CI reported **53
-passed, 4 POSIX-only tests skipped**; Ubuntu CI reported **51 passed, 6 skipped**
-(five Windows-only tests and optional Zsh absent). This includes live CMD and
-Windows PowerShell, persistent directory and environment changes, pipes,
-redirection, Unicode, VT transport, dimensions, Ctrl+C, normal exit, large
-output and active process-tree cleanup. Linux initial sizing, shell history and
-completion, and process cleanup passed in Ubuntu CI. Ruff format and lint, strict
-mypy (17 source files), offline lock verification, dependency compatibility (27
-packages), sdist/wheel build, wheel-content checks, and clean installed-wheel CLI
-plus real CMD smoke passed. PowerShell 7 passed on the Windows runner; Zsh was
-not installed on Ubuntu. Ubuntu CI does not claim Kali-specific validation.
+Windows 10 local evidence: full suite **52 passed, 6 platform/optional-shell
+tests skipped**. Windows CI reported **53 passed, 5 POSIX-only tests skipped**;
+Ubuntu CI reported **52 passed, 6 skipped** (five Windows-only tests and optional
+Zsh absent). This includes live CMD, Windows PowerShell and PowerShell 7; directory
+listing; persistent directory/environment changes; pipes, redirection, Unicode,
+ANSI/VT transport, dimensions, line editing, tab completion, arrow history, Ctrl+C,
+Ctrl+D, exit status, abrupt exit, bounded large-output streaming, and process-tree
+cleanup. Ruff format/lint, strict mypy (17 source files), offline lock verification,
+dependency compatibility (27 packages), sdist/wheel build, wheel-content checks,
+and clean installed-wheel CLI plus real CMD smoke passed. Ubuntu verifies the
+POSIX backend; it does not claim Kali-specific validation. Zsh was unavailable on
+the Ubuntu runner.
 
 See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md) for the API, shell configuration,
 stream behavior, cleanup rules, security boundary and developer verification.

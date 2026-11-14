@@ -7,15 +7,18 @@ tests. This is only the local backend; the desktop frontend remains Phase 4 and
 the public portfolio command terminal remains Phase 5.
 
 The implementation and test commit
-`2601d56873a79c32b61e5f5dee66bb77583eae71` passed Windows and Ubuntu Actions run
-[43614734702](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43614734702).
-Windows reported 53 passed/4 POSIX-only skipped; Ubuntu reported 51 passed/6
+`34566dd14c51f9425fe746cac3a061b7287db474` passed Windows and Ubuntu Actions run
+[43615724564](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43615724564).
+Windows reported 53 passed/5 POSIX-only skipped; Ubuntu reported 52 passed/6
 skipped (five Windows-only and Zsh unavailable). Ruff format/lint, strict mypy,
 offline lock validation, dependency compatibility, sdist/wheel build, wheel
 contents, clean installed-wheel CLI, and real installed shell smoke passed.
-PowerShell 7 passed on the Windows runner. See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md).
-Kali was not directly tested; Ubuntu verifies the POSIX adapter. Phase 4 remains
-the next planned milestone and has not been started.
+Windows tests covered CMD, Windows PowerShell, PowerShell 7, input editing,
+resizing, interruption and child cleanup. POSIX tests covered Bash operations,
+initial/dynamic dimensions, history/completion, EOF, abrupt exit and child cleanup.
+See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md). Kali was not directly tested;
+Ubuntu verifies the POSIX adapter. Phase 4 remains planned and has not been
+started.
 
 # Implementation plan and requirement mapping
 
