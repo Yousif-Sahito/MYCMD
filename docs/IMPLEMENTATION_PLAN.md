@@ -42,8 +42,7 @@ Windows CMD on Python 3.13.18 with 15 dependencies. Current source CLI smoke als
 for help/status and five entity list groups. Phase 2 is locally verified but cross-platform Actions exposed a UTF-8 BOM in
 pyproject.toml. The BOM was removed and local checks rerun successfully; corrective commit `a03ff4f055cec6ac63c96481a53fda447d295f6c` passed GitHub Actions
 run [43584677394](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43584677394) on
-Windows and Ubuntu. Both jobs passed all steps. This documentation update requires a
-final CI run before closure. The original Phase 2 commit is pushed; it is not complete until both Windows and
+Windows and Ubuntu. Both jobs passed all steps. A final docs-only commit is being checked separately by CI. The original Phase 2 commit is pushed; it is not complete until both Windows and
 Ubuntu CI jobs pass. See PROGRESS.md for evidence. See DOMAIN_STORAGE.md for storage
 decisions and limitations.
 

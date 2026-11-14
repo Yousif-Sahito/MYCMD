@@ -310,5 +310,11 @@ extracted-wheel smoke all pass after correction. The BOM correction and this evi
 GitHub Actions run [43584677394](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43584677394)
 passed on both Windows and Ubuntu. Both jobs passed lock, sync, dependency checks,
 Ruff format/lint, mypy, pytest, build and wheel smoke. This evidence applies to the
-corrected commit. Documentation is now being updated and will receive a separate CI
-run before declaring final verification.
+corrected commit. A final documentation-only follow-up will also be checked by CI. The final release
+report will identify its run and commit.
+
+Final source verification: commit `5097891c40691e93e39644a06adaa7d56e448fea`
+passed workflow run [43584816259](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43584816259).
+Both `python (windows-latest)` and `python (ubuntu-latest)` passed lock, sync, dependency
+compatibility, Ruff format/lint, strict mypy, pytest, package build and wheel smoke.
+The docs-only follow-up remains to be verified by CI.
