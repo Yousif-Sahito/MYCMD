@@ -306,6 +306,9 @@ Actions run 43584493799. Ubuntu failed at `uv sync --frozen --extra dev`: Hatchl
 reported invalid TOML at line 1. Inspection confirmed PowerShell had added a UTF-8 BOM
 to pyproject.toml. Removed the BOM and verified Python tomllib parses the file. Ruff
 format/lint, strict mypy, 42 tests, offline lock, isolated sdist/wheel build, and
-extracted-wheel smoke all pass after correction. A corrective commit and new cross-OS
-CI run are pending; Phase 2 remains incomplete until both jobs pass on the corrected
-revision.
+extracted-wheel smoke all pass after correction. The BOM correction and this evidence were committed as `a03ff4f055cec6ac63c96481a53fda447d295f6c`.
+GitHub Actions run [43584677394](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43584677394)
+passed on both Windows and Ubuntu. Both jobs passed lock, sync, dependency checks,
+Ruff format/lint, mypy, pytest, build and wheel smoke. This evidence applies to the
+corrected commit. Documentation is now being updated and will receive a separate CI
+run before declaring final verification.
