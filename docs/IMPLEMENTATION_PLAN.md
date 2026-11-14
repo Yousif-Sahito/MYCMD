@@ -39,8 +39,10 @@ gates. Phase 1 commit and CI verification are complete. Phase 2 local verificati
 mypy pass, uv dependency check and offline lock check pass (26 packages), isolated
 sdist/wheel build passes, and installed-wheel CLI help/status passed in user-verified
 Windows CMD on Python 3.13.18 with 15 dependencies. Current source CLI smoke also passes
-for help/status and five entity list groups. Phase 2 is locally prepared for commit and
-cross-platform GitHub Actions verification; it is not complete until both Windows and
+for help/status and five entity list groups. Phase 2 is locally verified but cross-platform Actions exposed a UTF-8 BOM in
+pyproject.toml. The BOM was removed and local checks rerun successfully; corrective
+CI is pending. Phase 2 remains incomplete until both jobs pass on the corrected
+revision. The original Phase 2 commit is pushed; it is not complete until both Windows and
 Ubuntu CI jobs pass. See PROGRESS.md for evidence. See DOMAIN_STORAGE.md for storage
 decisions and limitations.
 

@@ -298,3 +298,14 @@ verified and dependency setup cannot proceed. Phase 0 remains incomplete.
 All TR-01–TR-08 and FR-01–FR-10 remain incomplete. Phases 1–10 are not started.
 See IMPLEMENTATION_PLAN.md for their scope, tests and release checklist. Credentials
 and hosting are not needed at this stage. No public shell endpoint exists.
+
+## Phase 2 CI correction
+
+Initial pushed Phase 2 commit `0edbe9790cc2f6e017784c8f7913648a42600136` triggered
+Actions run 43584493799. Ubuntu failed at `uv sync --frozen --extra dev`: Hatchling
+reported invalid TOML at line 1. Inspection confirmed PowerShell had added a UTF-8 BOM
+to pyproject.toml. Removed the BOM and verified Python tomllib parses the file. Ruff
+format/lint, strict mypy, 42 tests, offline lock, isolated sdist/wheel build, and
+extracted-wheel smoke all pass after correction. A corrective commit and new cross-OS
+CI run are pending; Phase 2 remains incomplete until both jobs pass on the corrected
+revision.
