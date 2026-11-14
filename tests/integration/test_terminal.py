@@ -249,7 +249,7 @@ def test_bash_real_pty_persistence_resize_signals_and_cleanup(tmp_path: Path) ->
         session.write(
             b"printf 'pipe-data\\n' | tr 'p' 'P'; printf 'MYCMD-PIPE-'; printf 'END\\n'\n"
         )
-        assert "Pipe-data" in asyncio.run(read_until(session, "MYCMD-PIPE-END"))
+        assert "PiPe-data" in asyncio.run(read_until(session, "MYCMD-PIPE-END"))
 
         target = tmp_path / "redirect.txt"
         command = (
