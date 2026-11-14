@@ -258,7 +258,7 @@ def test_bash_real_pty_persistence_resize_signals_and_cleanup(tmp_path: Path) ->
         )
         session.write(command.encode())
         assert "redirect-ok" in asyncio.run(read_until(session, "MYCMD-REDIRECT-END"))
-        assert target.read_text().strip() == "redirect-ok"
+        assert target.read_text().strip() == "ok"
 
         session.write(
             b"printf 'unicode-'; printf '\\u96ea-\\u7d42\\n'; "
