@@ -1,6 +1,7 @@
 # Runbook status
 
-Foundation only: there is no server, database migration, installer or deployment to run.
+Phase 1 local domain/SQLite is verified; see DOMAIN_STORAGE.md for migration and
+backup usage. There is no CLI, server, installer or deployment to run.
 Use README for target development checks and PROGRESS for actual evidence.
 
 Before production delivery, document and verify: Windows/Kali installation; MySQL test

@@ -17,6 +17,25 @@ dependent work. Skips and unavailable target systems do not count as verificatio
 | 9 | Packaging; FR-10 | OS-specific PyInstaller artifacts and clean Windows/Kali installation/launch; no development dependency assumptions |
 | 10 | Deployment; sections 25, 28 | HTTPS API, isolated MySQL, encrypted tested backups, static portfolio, rollback rehearsal and release checklist |
 
+## Current milestone status
+
+Phase 0 is complete per user-confirmed local verification and passing Windows and
+Ubuntu CI jobs. Historical recovery instructions below are retained as an audit
+trail, not active prerequisites. Do not reinstall tooling or repeat Phase 0.
+
+Phase 1 is locally verified: shared domain validation, owner-scoped SQLite CRUD,
+revision checks, tombstones, transactional migrations/outbox, restart and interrupted
+transaction recovery, snapshot exports and validated atomic imports. Latest review:
+32 tests passed; Ruff formatting/lint and mypy passed; offline lock check and installed
+dependency check passed (15 packages); fresh isolated sdist/wheel build and extracted
+wheel smoke passed. User's successful Hatchling 1.33.0 isolated build is also recorded
+in PROGRESS.md. The previous build blocker is resolved.
+
+CI now smoke-tests the wheel on Windows and Ubuntu after the existing verification
+gates. Phase 1 is ready for commit and GitHub CI; the new CI jobs have not run and no
+push is authorized. Phase 2 remains unstarted pending completion of Phase 1 CI
+verification. See DOMAIN_STORAGE.md for decisions and limitations.
+
 ## Phase 0 tree
 
 `pyproject.toml`, `.python-version`, `.env.example`, `.gitignore`, `README.md`,
@@ -25,7 +44,7 @@ dependent work. Skips and unavailable target systems do not count as verificatio
 `tests/{unit,integration,e2e}`, `scripts/`. Empty directories reserve boundaries only;
 they do not represent implemented features. Add `uv.lock` only from a successful resolver.
 
-## Phase 0 recovery gate (2026-11-14)
+## Historical Phase 0 recovery gate (superseded, 2026-11-14)
 
 Latest correction: the user supplied the installed WinGet uv executable's exact path.
 Launching it returned `Program 'uv.exe' failed to run: Access is denied` (exit 1).

@@ -1,5 +1,90 @@
 # MYCMD 2.0 progress
 
+## Current status ? Phase 1 locally verified; ready for commit and CI (2026-11-14)
+
+The user confirmed a successful isolated build in normal Windows CMD using Hatchling
+1.33.0, producing `mycmd-2.0.0.dev0.tar.gz` and
+`mycmd-2.0.0.dev0-py3-none-any.whl`. Both files were observed in dist.
+This supersedes the earlier missing-backend blocker; the project venv does not need
+hatchling installed because the build backend runs in isolation.
+
+Review fixed consistent-snapshot exports under concurrent writes, chronological
+backup timestamp validation (including tombstone consistency), strict optimistic
+version inputs, and URL control-character rejection. Regression tests cover these
+changes. Generated SQLite sidecars and interrupted-export temporary files are now
+ignored alongside existing build/cache/test artifacts. No generated artifacts are
+tracked, confirmed with git ls-files and git check-ignore.
+
+Executed successfully against the reviewed implementation:
+
+- `.venv\Scripts\python.exe -m ruff format --check src server tests scripts --no-cache`
+- `.venv\Scripts\python.exe -m ruff check src server tests scripts --no-cache`
+- `.venv\Scripts\python.exe -m mypy --cache-dir .tools\phase1-mypy`
+- `.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .tools\phase1-review-tests`: **32 passed, 0 failed, 0 skipped**.
+- Installed absolute-path uv: `lock --check --offline`: resolved 15 packages;
+  `pip check --python D:\project\.venv\Scripts\python.exe`: 15 compatible packages.
+- Installed absolute-path uv: `build --offline --out-dir .tools\phase1-review-dist`:
+  built the sdist and built the wheel from that sdist successfully.
+- `.venv\Scripts\python.exe scripts\check_wheel.py .tools\phase1-review-dist\mycmd-2.0.0.dev0-py3-none-any.whl`:
+  isolated wheel import, bundled SQL migration, CRUD, outbox and reopen smoke passed.
+- Absolute-path Git: `diff --check` passed; generated artifacts are ignored.
+
+The uv executable initially returned Access is denied in the sandbox. Approved
+execution outside the sandbox succeeded. No Windows permissions were changed and
+no project dependencies were reinstalled. Offline build used cached isolated build
+dependencies. The initial review lint import-order failure was corrected.
+
+Windows/Ubuntu CI now includes the wheel smoke check after its existing frozen-lock,
+dependency, lint, typecheck, pytest and build gates. New Phase 1 CI jobs have NOT run:
+no commit or push was made. Prior Phase 0 CI success remains user-confirmed evidence.
+Phase 1 is locally verified and ready for commit/CI; remote CI remains pending.
+Phase 2 has not started. No production, Kali, hardware power-loss, network sync or
+encrypted-backup support is claimed by this milestone.
+
+
+## Previous Phase 1 verification (build blocker now resolved)
+
+Phase 0 completion is confirmed by the user: local verification and both Windows
+and Ubuntu GitHub Actions jobs passed. Those CI results were not independently
+rerun in this session. Earlier environment blockers below are historical.
+
+Verified here: Git 2.56.1.windows.1 using `C:\Program Files\Git\cmd\git.exe`,
+clean starting working tree, Python 3.13.12 using `.venv\Scripts\python.exe`,
+and readable project documentation. Generated caches are excluded from discovery.
+No permissions, installations, deletions of existing files, commits or pushes occurred.
+
+Phase 1 implements shared five-entity validation, owner-scoped CRUD, UUIDs, UTC
+metadata, optimistic local revisions, tombstones, schema version 1, SQLite WAL/FULL
+transactions, durable device identity and ordered outbox operations. Record and
+outbox writes are atomic. Export uses an owner-scoped checksummed JSON envelope
+and atomic file replacement; import defaults to dry-run and refuses to overwrite
+conflicting records. Import is all-or-nothing and resets server tracking on restore.
+No network sync or server acknowledgment semantics are implemented (Phase 7).
+
+Validation commands use the existing environment, without dependency installation:
+
+```powershell
+& .\.venv\Scripts\python.exe -m ruff format --check src server tests scripts --no-cache
+& .\.venv\Scripts\python.exe -m ruff check src server tests scripts --no-cache
+& .\.venv\Scripts\python.exe -m mypy --cache-dir .tools\phase1-mypy
+& .\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --basetemp .tools\phase1-final-tests
+& .\.venv\Scripts\python.exe -m build --no-isolation --outdir .tools\phase1-dist
+```
+
+Build attempt failed: `ModuleNotFoundError: No module named 'hatchling'` /
+`Backend 'hatchling.build' is not available`. No dependencies were installed per
+user instruction. Phase 1 cannot be declared complete until a real build and
+artifact verification pass. New code has not run on Ubuntu/Kali or GitHub Actions.
+Final executed verification: Ruff formatting passed (11 files), Ruff lint passed,
+mypy passed (7 source files), pytest **25 passed, 0 failed, 0 skipped** in 0.95s,
+and `git diff --check` passed. Tests cover all five CRUD lifecycles, owner isolation,
+stale revisions, uniqueness, restart persistence, forced outbox rollback, abrupt
+process-exit rollback, backup roundtrip/dry-run/conflicts/corruption/invalid-entry
+atomicity, future/corrupt database refusal, and domain validation. Initial lint,
+type and collection failures were fixed before this final run. Build remains failed
+for the missing backend described above; no build success is claimed.
+
+
 ## Current status — Phase 0 started, incomplete (2026-11-14)
 
 Initial workspace contained only `MYCMD_V2_Codex_Implementation_Blueprint.pdf` (56,962
