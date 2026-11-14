@@ -110,6 +110,14 @@ def test_large_output_is_streamed_through_bounded_events(tmp_path: Path) -> None
             return count
 
         assert asyncio.run(asyncio.wait_for(read_large_output(), 12)) >= 200000
+
+        command = python_command(
+            "import sys; sys.stderr.write('MYCMD-' + 'STDERR-MERGED'); sys.stderr.flush()"
+        )
+        newline = "\r\n" if os.name == "nt" else "\n"
+        session.write(f"{command}{newline}".encode())
+        merged = asyncio.run(read_until(session, "MYCMD-STDERR-MERGED"))
+        assert "MYCMD-STDERR-MERGED" in merged
     finally:
         session.terminate()
 
@@ -134,6 +142,7 @@ def test_repeated_real_shell_sessions_close_cleanly(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(os.name != "nt", reason="Requires real Windows ConPTY")
 def test_cmd_persistence_pipe_unicode_resize_and_exit(tmp_path: Path) -> None:
+    (tmp_path / "mycmd-dir-entry.txt").write_text("dir test", encoding="utf-8")
     session = TerminalSession(
         discover_shell("cmd"), tmp_path, env={"MYCMD_INITIAL": "initial"}, columns=80, rows=24
     )
@@ -146,6 +155,9 @@ def test_cmd_persistence_pipe_unicode_resize_and_exit(tmp_path: Path) -> None:
         assert str(tmp_path).casefold() in output.casefold()
         assert "initial" in output
         assert "\x1b[" in output
+
+        session.write(b"dir /b\r\n")
+        assert "mycmd-dir-entry.txt" in asyncio.run(read_until(session, "mycmd-dir-entry.txt"))
 
         session.write(b"echo MYCMD-MARX\x7fK\r\n")
         assert "MYCMD-MARK" in asyncio.run(read_until(session, "MYCMD-MARK"))
@@ -341,6 +353,9 @@ def test_bash_line_editing_and_filename_completion(tmp_path: Path) -> None:
         session.write(b"echo MYCMD-MARX\x7fK\n")
         assert "MYCMD-MARK" in asyncio.run(read_until(session, "MYCMD-MARK"))
 
+        session.write(b"echo MYCMD-MARX\x01\x05\x7fK\n")
+        assert "MYCMD-MARK" in asyncio.run(read_until(session, "MYCMD-MARK"))
+
         completion_file = tmp_path / "mycmd-completion-target.txt"
         completion_file.write_text("MYCMD-COMPLETION-CONTENT", encoding="utf-8")
         session.write(b"cat mycmd-completion-\t\n")
@@ -352,6 +367,10 @@ def test_bash_line_editing_and_filename_completion(tmp_path: Path) -> None:
         assert "MYCMD-HISTORY-REPLAY" in asyncio.run(read_until(session, "MYCMD-HISTORY-REPLAY"))
         session.write(b"\x1b[A\n")
         assert "MYCMD-HISTORY-REPLAY" in asyncio.run(read_until(session, "MYCMD-HISTORY-REPLAY"))
+
+        session.write(b"printf '\\033[31mMYCMD-'; printf 'ANSI-END\\033[0m\\n'\n")
+        ansi = asyncio.run(read_until(session, "MYCMD-ANSI-END"))
+        assert "\x1b[31m" in ansi and "\x1b[0m" in ansi
     finally:
         session.terminate()
 
@@ -403,3 +422,26 @@ def test_posix_termination_cleans_foreground_child(tmp_path: Path) -> None:
         assert not child_exists(), f"Foreground process {child_pid} survived PTY shutdown"
     finally:
         session.terminate(timeout=5)
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Requires genuine POSIX PTY")
+def test_bash_eof_and_unexpected_exit_status(tmp_path: Path) -> None:
+    bash = shutil.which("bash")
+    if bash is None:
+        pytest.skip("bash is not installed")
+
+    eof_session = TerminalSession(discover_shell(bash), tmp_path)
+    eof_session.start()
+    eof_session.write(b"\x04")
+    assert eof_session.wait(8) == 0
+    assert eof_session.state is SessionState.EXITED
+    eof_session.terminate()
+
+    killed_session = TerminalSession(discover_shell(bash), tmp_path)
+    killed_session.start()
+    try:
+        killed_session.write(b"kill -KILL $$\n")
+        assert killed_session.wait(8) == -9
+        assert killed_session.state is SessionState.EXITED
+    finally:
+        killed_session.terminate()
