@@ -432,10 +432,14 @@ def test_bash_eof_and_unexpected_exit_status(tmp_path: Path) -> None:
 
     eof_session = TerminalSession(discover_shell(bash), tmp_path)
     eof_session.start()
-    eof_session.write(b"\x04")
-    assert eof_session.wait(8) == 0
-    assert eof_session.state is SessionState.EXITED
-    eof_session.terminate()
+    try:
+        eof_session.write(b"printf 'MYCMD-EOF-'; printf 'READY\\n'\n")
+        asyncio.run(read_until(eof_session, "MYCMD-EOF-READY"))
+        eof_session.write(b"\x04")
+        assert eof_session.wait(8) == 0
+        assert eof_session.state is SessionState.EXITED
+    finally:
+        eof_session.terminate()
 
     killed_session = TerminalSession(discover_shell(bash), tmp_path)
     killed_session.start()
