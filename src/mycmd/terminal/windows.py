@@ -4,8 +4,9 @@ import os
 import subprocess
 import time
 from collections.abc import Mapping
+from importlib import import_module
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from mycmd.terminal.models import ShellSpec, TerminalError, TerminalIOError
 
@@ -22,11 +23,13 @@ class WindowsBackend:
 
     def start(self) -> None:
         try:
-            from winpty import PTY, Backend  # type: ignore[import-untyped]
+            winpty = import_module("winpty")
         except ImportError as exc:
             raise TerminalError("Windows ConPTY requires the installed pywinpty package") from exc
         try:
-            self.pty = PTY(self.columns, self.rows, backend=Backend.ConPTY)
+            pty_type = cast(Any, winpty.PTY)
+            backend_type = cast(Any, winpty.Backend)
+            self.pty = pty_type(self.columns, self.rows, backend=backend_type.ConPTY)
             cmdline = " " + subprocess.list2cmdline(list(self.shell.args))
             environment = os.environ.copy()
             environment.update(self.env)
@@ -123,7 +126,7 @@ class WindowsBackend:
                     check=False,
                     capture_output=True,
                     timeout=max(1.0, timeout),
-                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    creationflags=int(getattr(subprocess, "CREATE_NO_WINDOW", 0)),
                 )
             except (OSError, subprocess.TimeoutExpired) as exc:
                 raise TerminalError(f"Could not stop the ConPTY process tree: {exc}") from exc
