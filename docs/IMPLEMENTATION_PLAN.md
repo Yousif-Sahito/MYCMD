@@ -1,4 +1,4 @@
-# Phase 3 status — terminal engine in progress
+# Phase 3 status — terminal engine verified
 
 The current work implements the shared terminal-session/backend protocol,
 PyWinpty ConPTY on Windows, POSIX PTYs on Linux, shell discovery, byte-streamed
@@ -6,15 +6,16 @@ bounded events, resize, interrupt, lifecycle cleanup, and real-shell integration
 tests. This is only the local backend; the desktop frontend remains Phase 4 and
 the public portfolio command terminal remains Phase 5.
 
-The implementation commit `8359508088852c11313ec79d502c13d26d7397ce` passed
-Windows and Ubuntu Actions run [43612243867](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43612243867).
-That run reported 51 passed/2 POSIX-only skipped on Windows and 49 passed/4
-Windows-only skipped on Ubuntu. The current worktree extends shell input and
-repeated-session coverage; its Windows run reports **52 passed, 5 skipped**.
-Ruff, strict mypy, offline lock validation, dependency compatibility,
-sdist/wheel build, wheel-content checks, and clean installed-wheel CLI plus real
-CMD smoke passed locally. The new test revision must pass both CI jobs before
-closure. See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md).
+The implementation and test commit
+`2601d56873a79c32b61e5f5dee66bb77583eae71` passed Windows and Ubuntu Actions run
+[43614734702](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43614734702).
+Windows reported 53 passed/4 POSIX-only skipped; Ubuntu reported 51 passed/6
+skipped (five Windows-only and Zsh unavailable). Ruff format/lint, strict mypy,
+offline lock validation, dependency compatibility, sdist/wheel build, wheel
+contents, clean installed-wheel CLI, and real installed shell smoke passed.
+PowerShell 7 passed on the Windows runner. See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md).
+Kali was not directly tested; Ubuntu verifies the POSIX adapter. Phase 4 remains
+the next planned milestone and has not been started.
 
 # Implementation plan and requirement mapping
 

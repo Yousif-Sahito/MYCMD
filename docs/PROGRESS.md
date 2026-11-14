@@ -1,11 +1,10 @@
-# Phase 3 — local terminal engine (in progress)
+# Phase 3 — local terminal engine (verified)
 
-The Phase 3 implementation is committed on `main`. The engine commit
-`8359508088852c11313ec79d502c13d26d7397ce` passed Windows and Ubuntu GitHub
-Actions run [43612243867](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43612243867).
-The current work adds further real-shell keyboard and repeated-session tests;
-that follow-up is being verified before Phase 3 closure. The user's pre-existing
-README and `.gitignore` edits remain separate and are preserved.
+The Phase 3 implementation and expanded real-shell tests are committed on `main`
+at `2601d56873a79c32b61e5f5dee66bb77583eae71`. Windows and Ubuntu GitHub Actions
+run [43614734702](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43614734702)
+passed both jobs. The user's pre-existing README and `.gitignore` edits remain
+separate and are preserved.
 
 Implemented a typed `TerminalSession` / `TerminalBackend` boundary, shell
 discovery, bounded incremental byte events, lifecycle states, and native adapters:
@@ -16,19 +15,18 @@ process-tree cleanup only after graceful exit times out. The Windows-only
 `pywinpty>=3.1.2` dependency is locked with a platform marker. Existing MYCMD
 application commands and SQLite architecture remain separate and unchanged.
 
-Windows 10 local evidence on the current worktree: full suite **52 passed, 5
-platform/optional-shell tests skipped**; terminal tests contributed 10 passes.
-This includes live CMD and Windows
-PowerShell, persistent directory and environment changes, pipes, redirection,
-Unicode, VT transport, dimensions, Ctrl+C, normal exit, large output and active
-process-tree cleanup; Linux initial sizing, shell history/completion, and process
-cleanup execute in Ubuntu CI. Ruff format and lint, strict mypy (17 source files),
-offline lock verification, dependency compatibility (27 packages), sdist/wheel
-build, wheel-content checks, and a clean installed-wheel CLI plus real CMD smoke
-test passed. On run 43612243867, Ubuntu reported **49 passed, 4 Windows-only
-tests skipped** and Windows reported **51 passed, 2 POSIX-only tests skipped**.
-The current added tests still need a fresh Windows/Ubuntu Actions run. Ubuntu CI
-does not claim Kali-specific validation.
+Windows 10 local evidence: full suite **52 passed, 5 platform/optional-shell
+tests skipped**; terminal tests contributed 10 passes. Windows CI reported **53
+passed, 4 POSIX-only tests skipped**; Ubuntu CI reported **51 passed, 6 skipped**
+(five Windows-only tests and optional Zsh absent). This includes live CMD and
+Windows PowerShell, persistent directory and environment changes, pipes,
+redirection, Unicode, VT transport, dimensions, Ctrl+C, normal exit, large
+output and active process-tree cleanup. Linux initial sizing, shell history and
+completion, and process cleanup passed in Ubuntu CI. Ruff format and lint, strict
+mypy (17 source files), offline lock verification, dependency compatibility (27
+packages), sdist/wheel build, wheel-content checks, and clean installed-wheel CLI
+plus real CMD smoke passed. PowerShell 7 passed on the Windows runner; Zsh was
+not installed on Ubuntu. Ubuntu CI does not claim Kali-specific validation.
 
 See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md) for the API, shell configuration,
 stream behavior, cleanup rules, security boundary and developer verification.
