@@ -4,6 +4,7 @@ permissions:
   contents: read
 jobs:
   python:
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -15,13 +16,13 @@ jobs:
         with:
           python-version: '3.13'
       - uses: astral-sh/setup-uv@v6
-      # Fail closed until a real resolved lockfile has been generated and reviewed.
       - run: uv lock --check
       - run: uv sync --frozen --extra dev
       - run: uv pip check
-      - run: uv run --frozen --extra dev ruff format --check .
-      - run: uv run --frozen --extra dev ruff check .
+      - run: uv run --frozen --extra dev ruff format --check src server tests scripts
+      - run: uv run --frozen --extra dev ruff check src server tests scripts
       - run: uv run --frozen --extra dev mypy
       - run: uv run --frozen --extra dev pytest -q
       - run: uv run --frozen --extra dev python -m build
       - run: uv run --frozen --extra dev python scripts/check_wheel.py dist/mycmd-2.0.0.dev0-py3-none-any.whl
+      - run: uv run --frozen --extra dev python scripts/check_installed_wheel.py dist/mycmd-2.0.0.dev0-py3-none-any.whl

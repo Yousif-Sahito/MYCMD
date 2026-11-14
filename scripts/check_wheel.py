@@ -36,6 +36,12 @@ def main() -> None:
         with zipfile.ZipFile(wheel) as archive:
             names = archive.namelist()
             assert "mycmd/storage/migrations/001_initial.sql" in names
+            for name in (
+                "mycmd/terminal/session.py",
+                "mycmd/terminal/windows.py",
+                "mycmd/terminal/posix.py",
+            ):
+                assert name in names, f"Missing terminal engine module: {name}"
             assert not any(name.startswith(("server/", "tests/", "apps/")) for name in names)
             for name in names:
                 destination = (Path(directory) / name).resolve()

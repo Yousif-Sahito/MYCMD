@@ -1,3 +1,13 @@
+# Phase 3 terminal engine
+
+The local terminal package has a shared `TerminalSession` and typed
+`TerminalBackend` protocol. Windows uses PyWinpty with ConPTY explicitly
+selected; POSIX uses `pty.fork`, a controlling terminal, process groups and
+window-size ioctls. The session streams bounded byte events and combines stdout
+and stderr as native PTYs do. The desktop renderer is deferred to Phase 4. The
+local engine has no network listener and is not reused by the public portfolio
+terminal.
+
 # Architecture decisions
 
 Source: blueprint sections 1–25. Implementation status is tracked separately.
@@ -5,8 +15,8 @@ Source: blueprint sections 1–25. Implementation status is tracked separately.
 - Native CLI: Typer/Rich commands call shared Python domain services. The host shell
   retains OS behavior; optional shell mode explicitly launches a native shell.
 - Desktop: PySide6 with bundled xterm.js in Qt WebEngine and a trusted local bridge.
-  POSIX uses PTY/process groups; Windows uses a verified ConPTY wrapper. Dependency
-  compatibility must be proven in Phase 3 before desktop integration.
+  It will consume the Phase 3 session API and maintain its own bounded 5,000-line
+  scrollback; the engine owns process I/O and lifecycle, not GUI rendering.
 - Public portfolio: React/TypeScript/xterm.js and a deterministic local command registry.
   No shell bridge, WebSocket shell, eval, subprocess access or generic command API.
 - Core: validation and services shared by CLI and GUI. UUID/owner/UTC/version/tombstone
@@ -21,5 +31,5 @@ Source: blueprint sections 1–25. Implementation status is tracked separately.
   remotely. Curated public serialization explicitly excludes private fields.
 
 The client wheel includes only `src/mycmd`; server and portfolio are separate artifacts.
-No runtime dependencies are introduced until their phase can install, lock and test them.
-Future terminal tests must exercise real commands and persistent shell state on both OSes.
+The platform-specific `pywinpty` runtime dependency is locked only on Windows.
+Terminal integration tests exercise real commands and persistent shell state on both OSes.

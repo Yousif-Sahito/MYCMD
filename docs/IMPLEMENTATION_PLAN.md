@@ -1,3 +1,20 @@
+# Phase 3 status — terminal engine in progress
+
+The current work implements the shared terminal-session/backend protocol,
+PyWinpty ConPTY on Windows, POSIX PTYs on Linux, shell discovery, byte-streamed
+bounded events, resize, interrupt, lifecycle cleanup, and real-shell integration
+tests. This is only the local backend; the desktop frontend remains Phase 4 and
+the public portfolio command terminal remains Phase 5.
+
+Local Windows 10 evidence: **51 tests passed, 2 Linux-only tests skipped**; the
+terminal-specific tests contributed 9 passes. CMD and Windows PowerShell were
+launched as real shells. Ruff format/lint, strict mypy, offline lock validation,
+dependency compatibility, sdist/wheel build, wheel-content checks, and a clean
+installed-wheel CLI plus real CMD smoke test passed. Ubuntu CI has not run for
+Phase 3. See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md). Do not close Phase 3
+until the final committed source and documentation pass both Windows and Ubuntu
+CI.
+
 # Implementation plan and requirement mapping
 
 Each phase requires executable tests and a status report. Failures are fixed before

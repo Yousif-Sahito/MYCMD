@@ -1,3 +1,32 @@
+# Phase 3 — local terminal engine (in progress)
+
+Implementation is in the worktree on `main`; no Phase 3 commit or CI run exists
+yet. Phase 1/2 files and the user's pre-existing README and ignore-rule edits are
+being preserved and will not be included in the Phase 3 commit.
+
+Implemented a typed `TerminalSession` / `TerminalBackend` boundary, shell
+discovery, bounded incremental byte events, lifecycle states, and native adapters:
+PyWinpty ConPTY on Windows and a controlling POSIX PTY on Linux. Sessions keep a
+real shell alive across commands, support initial cwd/environment, resize,
+interrupt, exit status, and controlled shutdown. Windows shutdown uses a targeted
+process-tree cleanup only after graceful exit times out. The Windows-only
+`pywinpty>=3.1.2` dependency is locked with a platform marker. Existing MYCMD
+application commands and SQLite architecture remain separate and unchanged.
+
+Windows 10 local evidence: full suite **51 passed, 2 POSIX-only tests skipped**;
+the terminal tests contributed 9 passes. This includes live CMD and Windows
+PowerShell, persistent directory and environment changes, pipes, redirection,
+Unicode, VT transport, dimensions, Ctrl+C, normal exit, large output and active
+process-tree cleanup; POSIX initial sizing and process-tree cleanup remain for
+Ubuntu CI. Ruff format and lint, strict mypy (17 source files),
+offline lock verification, dependency compatibility (27 packages), sdist/wheel
+build, wheel-content checks, and a clean installed-wheel CLI plus real CMD smoke
+test passed. Ubuntu Actions has not run for Phase 3. Ubuntu/Kali behavior is not
+yet claimed. Final CI and commit evidence remain pending.
+
+See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md) for the API, shell configuration,
+stream behavior, cleanup rules, security boundary and developer verification.
+
 # MYCMD 2.0 progress
 
 ## Current status — Phase 1 complete; Phase 2 underway (2026-11-14)
