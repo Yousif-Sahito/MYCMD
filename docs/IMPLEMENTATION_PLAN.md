@@ -6,14 +6,15 @@ bounded events, resize, interrupt, lifecycle cleanup, and real-shell integration
 tests. This is only the local backend; the desktop frontend remains Phase 4 and
 the public portfolio command terminal remains Phase 5.
 
-Local Windows 10 evidence: **51 tests passed, 2 Linux-only tests skipped**; the
-terminal-specific tests contributed 9 passes. CMD and Windows PowerShell were
-launched as real shells. Ruff format/lint, strict mypy, offline lock validation,
-dependency compatibility, sdist/wheel build, wheel-content checks, and a clean
-installed-wheel CLI plus real CMD smoke test passed. Ubuntu CI has not run for
-Phase 3. See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md). Do not close Phase 3
-until the final committed source and documentation pass both Windows and Ubuntu
-CI.
+The implementation commit `8359508088852c11313ec79d502c13d26d7397ce` passed
+Windows and Ubuntu Actions run [43612243867](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43612243867).
+That run reported 51 passed/2 POSIX-only skipped on Windows and 49 passed/4
+Windows-only skipped on Ubuntu. The current worktree extends shell input and
+repeated-session coverage; its Windows run reports **52 passed, 5 skipped**.
+Ruff, strict mypy, offline lock validation, dependency compatibility,
+sdist/wheel build, wheel-content checks, and clean installed-wheel CLI plus real
+CMD smoke passed locally. The new test revision must pass both CI jobs before
+closure. See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md).
 
 # Implementation plan and requirement mapping
 

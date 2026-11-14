@@ -1,8 +1,11 @@
 # Phase 3 — local terminal engine (in progress)
 
-Implementation is in the worktree on `main`; no Phase 3 commit or CI run exists
-yet. Phase 1/2 files and the user's pre-existing README and ignore-rule edits are
-being preserved and will not be included in the Phase 3 commit.
+The Phase 3 implementation is committed on `main`. The engine commit
+`8359508088852c11313ec79d502c13d26d7397ce` passed Windows and Ubuntu GitHub
+Actions run [43612243867](https://github.com/Yousif-Sahito/MYCMD/actions/runs/43612243867).
+The current work adds further real-shell keyboard and repeated-session tests;
+that follow-up is being verified before Phase 3 closure. The user's pre-existing
+README and `.gitignore` edits remain separate and are preserved.
 
 Implemented a typed `TerminalSession` / `TerminalBackend` boundary, shell
 discovery, bounded incremental byte events, lifecycle states, and native adapters:
@@ -13,16 +16,19 @@ process-tree cleanup only after graceful exit times out. The Windows-only
 `pywinpty>=3.1.2` dependency is locked with a platform marker. Existing MYCMD
 application commands and SQLite architecture remain separate and unchanged.
 
-Windows 10 local evidence: full suite **51 passed, 2 POSIX-only tests skipped**;
-the terminal tests contributed 9 passes. This includes live CMD and Windows
+Windows 10 local evidence on the current worktree: full suite **52 passed, 5
+platform/optional-shell tests skipped**; terminal tests contributed 10 passes.
+This includes live CMD and Windows
 PowerShell, persistent directory and environment changes, pipes, redirection,
 Unicode, VT transport, dimensions, Ctrl+C, normal exit, large output and active
-process-tree cleanup; POSIX initial sizing and process-tree cleanup remain for
-Ubuntu CI. Ruff format and lint, strict mypy (17 source files),
+process-tree cleanup; Linux initial sizing, shell history/completion, and process
+cleanup execute in Ubuntu CI. Ruff format and lint, strict mypy (17 source files),
 offline lock verification, dependency compatibility (27 packages), sdist/wheel
 build, wheel-content checks, and a clean installed-wheel CLI plus real CMD smoke
-test passed. Ubuntu Actions has not run for Phase 3. Ubuntu/Kali behavior is not
-yet claimed. Final CI and commit evidence remain pending.
+test passed. On run 43612243867, Ubuntu reported **49 passed, 4 Windows-only
+tests skipped** and Windows reported **51 passed, 2 POSIX-only tests skipped**.
+The current added tests still need a fresh Windows/Ubuntu Actions run. Ubuntu CI
+does not claim Kali-specific validation.
 
 See [TERMINAL_ENGINE.md](TERMINAL_ENGINE.md) for the API, shell configuration,
 stream behavior, cleanup rules, security boundary and developer verification.

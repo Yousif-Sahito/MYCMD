@@ -24,8 +24,10 @@ from mycmd.terminal.models import validate_dimensions
 
 
 async def read_until(session: TerminalSession, marker: str, timeout: float = 8.0) -> str:
+    output = ""
+
     async def collect() -> str:
-        output = ""
+        nonlocal output
         async for event in session.read_events():
             if event.error:
                 raise AssertionError(event.error)
@@ -35,7 +37,10 @@ async def read_until(session: TerminalSession, marker: str, timeout: float = 8.0
                     return output
         raise AssertionError(f"Session exited before marker {marker!r}; output={output!r}")
 
-    return await asyncio.wait_for(collect(), timeout)
+    try:
+        return await asyncio.wait_for(collect(), timeout)
+    except TimeoutError as exc:
+        raise AssertionError(f"Timed out waiting for {marker!r}; output={output!r}") from exc
 
 
 def python_command(code: str) -> str:
@@ -109,6 +114,24 @@ def test_large_output_is_streamed_through_bounded_events(tmp_path: Path) -> None
         session.terminate()
 
 
+def test_repeated_real_shell_sessions_close_cleanly(tmp_path: Path) -> None:
+    for index in range(3):
+        shell = discover_shell("cmd" if os.name == "nt" else "bash")
+        session = TerminalSession(shell, tmp_path)
+        session.start()
+        try:
+            marker = f"MYCMD-REPEAT-{index}"
+            if os.name == "nt":
+                session.write(b"set A=MYCMD-\r\n")
+                session.write(f"set B=REPEAT-{index}\r\necho %A%%B%\r\n".encode())
+            else:
+                session.write(f"printf 'MYCMD-REPEAT-'; printf '{index}\\n'\n".encode())
+            asyncio.run(read_until(session, marker))
+        finally:
+            session.terminate()
+        assert session.state is SessionState.CLOSED
+
+
 @pytest.mark.skipif(os.name != "nt", reason="Requires real Windows ConPTY")
 def test_cmd_persistence_pipe_unicode_resize_and_exit(tmp_path: Path) -> None:
     session = TerminalSession(
@@ -123,6 +146,9 @@ def test_cmd_persistence_pipe_unicode_resize_and_exit(tmp_path: Path) -> None:
         assert str(tmp_path).casefold() in output.casefold()
         assert "initial" in output
         assert "\x1b[" in output
+
+        session.write(b"echo MYCMD-MARX\x7fK\r\n")
+        assert "MYCMD-MARK" in asyncio.run(read_until(session, "MYCMD-MARK"))
 
         session.write(b"set B=INITIAL-SIZE\r\n")
         session.write(b'mode con | findstr /i "Columns Lines" & echo %A%%B%\r\n')
@@ -221,6 +247,21 @@ def test_windows_powershell_real_session(tmp_path: Path) -> None:
         session.terminate()
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Requires real Windows ConPTY")
+def test_powershell_7_session_when_installed(tmp_path: Path) -> None:
+    if shutil.which("pwsh.exe") is None:
+        pytest.skip("PowerShell 7 is not installed")
+    session = TerminalSession(discover_shell("pwsh"), tmp_path)
+    session.start()
+    try:
+        session.write(b"Write-Output ('MYCMD-' + 'PWSH-READY')\r\n")
+        assert "MYCMD-PWSH-READY" in asyncio.run(read_until(session, "MYCMD-PWSH-READY"))
+        session.write(b"exit 0\r\n")
+        assert session.wait(8) == 0
+    finally:
+        session.terminate()
+
+
 @pytest.mark.skipif(os.name == "nt", reason="Requires genuine POSIX PTY")
 def test_bash_real_pty_persistence_resize_signals_and_cleanup(tmp_path: Path) -> None:
     bash = shutil.which("bash")
@@ -285,6 +326,48 @@ def test_bash_real_pty_persistence_resize_signals_and_cleanup(tmp_path: Path) ->
         assert "40 130" in after_interrupt
         session.write(b"exit 7\n")
         assert session.wait(8) == 7
+    finally:
+        session.terminate()
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Requires genuine POSIX PTY")
+def test_bash_line_editing_and_filename_completion(tmp_path: Path) -> None:
+    bash = shutil.which("bash")
+    if bash is None:
+        pytest.skip("bash is not installed")
+    session = TerminalSession(discover_shell(bash), tmp_path)
+    session.start()
+    try:
+        session.write(b"echo MYCMD-MARX\x7fK\n")
+        assert "MYCMD-MARK" in asyncio.run(read_until(session, "MYCMD-MARK"))
+
+        completion_file = tmp_path / "mycmd-completion-target.txt"
+        completion_file.write_text("MYCMD-COMPLETION-CONTENT", encoding="utf-8")
+        session.write(b"cat mycmd-completion-\t\n")
+        assert "MYCMD-COMPLETION-CONTENT" in asyncio.run(
+            read_until(session, "MYCMD-COMPLETION-CONTENT")
+        )
+
+        session.write(b"printf 'MYCMD-HISTORY-'; printf 'REPLAY\\n'\n")
+        assert "MYCMD-HISTORY-REPLAY" in asyncio.run(read_until(session, "MYCMD-HISTORY-REPLAY"))
+        session.write(b"\x1b[A\n")
+        assert "MYCMD-HISTORY-REPLAY" in asyncio.run(read_until(session, "MYCMD-HISTORY-REPLAY"))
+    finally:
+        session.terminate()
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Requires genuine POSIX PTY")
+def test_zsh_real_session_when_installed(tmp_path: Path) -> None:
+    zsh = shutil.which("zsh")
+    if zsh is None:
+        pytest.skip("zsh is not installed")
+    session = TerminalSession(discover_shell(zsh), tmp_path)
+    session.start()
+    try:
+        session.write(b"printf 'MYCMD-ZSH-'; printf 'READY\\n'\n")
+        assert "MYCMD-ZSH-READY" in asyncio.run(read_until(session, "MYCMD-ZSH-READY"))
+        session.write(b"exit 0\n")
+        assert session.wait(8) == 0
     finally:
         session.terminate()
 
