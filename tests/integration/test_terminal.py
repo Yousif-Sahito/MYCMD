@@ -242,10 +242,15 @@ def test_conpty_termination_cleans_active_process_tree(tmp_path: Path) -> None:
 @pytest.mark.skipif(os.name != "nt", reason="Requires real Windows ConPTY")
 def test_windows_powershell_real_session(tmp_path: Path) -> None:
     session = TerminalSession(
-        discover_shell("powershell"), tmp_path, env={"MYCMD_INITIAL": "initial"}
+        discover_shell("powershell"),
+        tmp_path,
+        env={"MYCMD_INITIAL": "initial"},
+        columns=120,
+        rows=30,
     )
     session.start()
     try:
+        assert ">" in asyncio.run(read_until(session, ">"))
         session.write(b"Write-Output ('MYCMD-' + 'PS-READY')\r\n")
         assert "MYCMD-PS-READY" in asyncio.run(read_until(session, "MYCMD-PS-READY"))
         session.write(b"Write-Output $env:MYCMD_INITIAL\r\n")
@@ -266,6 +271,7 @@ def test_powershell_7_session_when_installed(tmp_path: Path) -> None:
     session = TerminalSession(discover_shell("pwsh"), tmp_path)
     session.start()
     try:
+        assert ">" in asyncio.run(read_until(session, ">"))
         session.write(b"Write-Output ('MYCMD-' + 'PWSH-READY')\r\n")
         assert "MYCMD-PWSH-READY" in asyncio.run(read_until(session, "MYCMD-PWSH-READY"))
         session.write(b"exit 0\r\n")

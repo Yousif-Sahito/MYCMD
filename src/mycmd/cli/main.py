@@ -2,15 +2,14 @@
 
 import os
 import sqlite3
-import sys
 from collections.abc import Iterable
-from pathlib import Path
 from typing import Annotated, NoReturn
 from uuid import UUID
 
 os.environ.setdefault("TYPER_USE_RICH", "0")
 import typer
 
+from mycmd.config import data_directory
 from mycmd.core.models import FIELDS, Record, ValidationError
 from mycmd.core.service import ConflictError, NotFoundError, Service
 from mycmd.storage.database import connect
@@ -22,6 +21,17 @@ app = typer.Typer(
     rich_markup_mode=None,
     pretty_exceptions_enable=False,
 )
+
+
+@app.command()
+def gui() -> None:
+    """Launch the optional local desktop application."""
+    try:
+        from mycmd.gui.app import run
+    except ImportError as exc:
+        fail(f"Desktop dependencies unavailable. Install mycmd[gui]. {exc}", 3)
+    raise typer.Exit(run())
+
 
 ENTITY_FIELDS = {
     "projects": (
@@ -48,19 +58,6 @@ ENTITY_FIELDS = {
     ),
     "milestones": ("title", "due_at", "priority", "status", "completed_at", "notes"),
 }
-
-
-def data_directory() -> Path:
-    configured = os.environ.get("MYCMD_DATA_DIR")
-    if configured:
-        return Path(configured).expanduser()
-    if sys.platform == "win32":
-        base = os.environ.get("LOCALAPPDATA")
-        return (Path(base) if base else Path.home() / "AppData" / "Local") / "MYCMD"
-    if sys.platform == "darwin":
-        return Path.home() / "Library" / "Application Support" / "MYCMD"
-    base = os.environ.get("XDG_DATA_HOME")
-    return (Path(base).expanduser() if base else Path.home() / ".local" / "share") / "mycmd"
 
 
 def service() -> Service:
