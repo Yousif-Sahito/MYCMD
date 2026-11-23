@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from shiboken6 import delete, isValid
 
 from mycmd.gui.settings import Preferences
 from mycmd.terminal.discovery import discover_shell
@@ -105,6 +106,8 @@ class TerminalPage(QWidget):
         self.events: queue.Queue[OutputEvent] = queue.Queue(64)
         self.stop = threading.Event()
         self.reader: threading.Thread | None = None
+        self.shutdown_complete = False
+        self.webengine_released = False
         self.renderer_ready = False
         self.dimensions = (80, 24)
         layout = QVBoxLayout(self)
@@ -310,9 +313,22 @@ class TerminalPage(QWidget):
                 raise RuntimeError("Terminal reader did not stop")
 
     def shutdown(self) -> None:
+        if self.shutdown_complete:
+            return
+        self.timer.stop()
         self.stop.set()
         if self.session:
             self.executor.submit(self.stop_session, self.session).result()
         self.executor.shutdown(wait=True, cancel_futures=False)
         if self.reader:
             self.reader.join(5)
+        self.shutdown_complete = True
+
+    def release_webengine(self) -> None:
+        if self.webengine_released:
+            return
+        self.webengine_released = True
+        self.renderer_ready = False
+        for owned in (self.channel, self.page, self.web, self.profile):
+            if isValid(owned):
+                delete(owned)

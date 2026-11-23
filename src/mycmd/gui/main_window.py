@@ -234,6 +234,7 @@ class MainWindow(QMainWindow):
                 self.terminal.timer.start(15)
                 self.show_error(f"Shutdown failed: {exc}")
                 return
+            self.terminal.release_webengine()
             self.closed = True
             self.shutdown_executor.shutdown(wait=False)
             self.close()

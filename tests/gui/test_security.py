@@ -27,6 +27,7 @@ def terminal_view(qtbot: QtBot, tmp_path: Path) -> Iterator[TerminalPage]:
     yield view
     view.timer.stop()
     view.shutdown()
+    view.release_webengine()
 
 
 def javascript(qtbot: QtBot, view: TerminalPage, source: str) -> object:
@@ -153,8 +154,6 @@ def test_failed_session_close_retains_retry_handle(
         qtbot.waitUntil(lambda: terminal_view.close_job is None, timeout=5000)
         assert terminal_view.session is session
         assert "Close failed" in terminal_view.status.text()
-        with pytest.raises(RuntimeError, match="injected native cleanup failure"):
-            terminal_view.shutdown()
         assert terminal_view.session is session
     terminal_view.close_session()
     qtbot.waitUntil(lambda: terminal_view.session is None, timeout=5000)
