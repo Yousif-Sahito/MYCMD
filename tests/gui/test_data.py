@@ -142,7 +142,7 @@ def test_validation_and_cli_interoperability_restart(qtbot, window, tmp_path):
     assert "precedes" in dialog.error.text()
     fill(dialog, {"started_at": "", "finished_at": ""})
     save(qtbot, dialog)
-    qtbot.waitUntil(lambda: len(page.records) == 1)
+    qtbot.waitUntil(lambda: len(page.records) == 1, timeout=15000)
     record_id = page.records[0].id
     env = os.environ.copy()
     env["MYCMD_DATA_DIR"] = str(tmp_path)

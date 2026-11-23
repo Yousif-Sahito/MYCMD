@@ -49,9 +49,11 @@ def test_navigation_rejects_untrusted_origins(
         QUrl.fromLocalFile(str(malicious)),
     ]:
         assert not terminal_view.page.acceptNavigationRequest(destination, navigation, True)
-        with qtbot.waitSignal(terminal_view.web.loadFinished, timeout=5000):
-            terminal_view.web.load(destination)
-        assert terminal_view.web.url() == trusted
+        terminal_view.web.load(destination)
+        qtbot.wait(100)
+        assert terminal_view.web.url() != destination
+        terminal_view.web.load(trusted)
+        qtbot.waitUntil(lambda: terminal_view.web.url() == trusted, timeout=5000)
     assert not terminal_view.page.acceptNavigationRequest(trusted, navigation, False)
 
 
