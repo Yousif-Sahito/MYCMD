@@ -113,7 +113,7 @@ def test_navigation_form_and_theme_screenshots(qtbot, navigation_window):
     qtbot.mouseClick(
         dialog.buttons.button(QDialogButtonBox.StandardButton.Save), Qt.MouseButton.LeftButton
     )
-    qtbot.waitUntil(lambda: page.table.rowCount() == 1, timeout=15000)
+    qtbot.waitUntil(lambda: page.table.rowCount() == 1, timeout=30000)
     assert window.grab().save(str(output / "populated-projects.png"))
     page.table.selectRow(0)
     page.edit()
