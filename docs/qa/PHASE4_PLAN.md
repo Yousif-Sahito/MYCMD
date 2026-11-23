@@ -1,6 +1,6 @@
 # Phase 4 execution plan
 
-Status: LOCAL IMPLEMENTATION AND VERIFICATION COMPLETE; EXACT-SHA CI PENDING.
+Status: VERIFIED - local gates and exact-SHA Windows/Ubuntu CI pass.
 
 1. Inspect all blueprint pages, existing code/configuration and baseline verification.
 2. Add optional PySide6 desktop dependencies and locally bundled xterm.js with licenses.
