@@ -71,7 +71,7 @@ def test_real_gui_shell_keyboard_render_resize_clipboard_restart(qtbot, tmp_path
         wait_text(qtbot, terminal.page, "☃_REAL_COLOR")
         assert "[31m" not in buffer(qtbot, terminal.page).split("☃_REAL_COLOR")[-1]
         old = terminal.dimensions
-        window.resize(1350, 850)
+        window.resize(720, 480)
         qtbot.waitUntil(lambda: terminal.dimensions != old, timeout=10000)
         qtbot.waitUntil(lambda: (session.columns, session.rows) == terminal.dimensions)
         QApplication.clipboard().setText("echo GUI_PASTED_84")

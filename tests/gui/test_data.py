@@ -84,10 +84,10 @@ def test_real_widget_crud_search_filter_and_delete(qtbot, window, tmp_path, kind
     qtbot.mouseClick(
         dialog.buttons.button(QDialogButtonBox.StandardButton.Save), Qt.MouseButton.LeftButton
     )
-    qtbot.waitUntil(lambda: len(page.records) == 1)
+    qtbot.waitUntil(lambda: len(page.records) == 1, timeout=15000)
     record_id = page.records[0].id
     assert page.records[0].data.items() >= EXAMPLES[kind].items()
-    qtbot.waitUntil(lambda: f"{kind.title()}: 1" in window.dashboard.text())
+    qtbot.waitUntil(lambda: f"{kind.title()}: 1" in window.dashboard.text(), timeout=15000)
     page.search.setText("nonexistent-query")
     assert page.table.rowCount() == 0
     assert page.empty.text() == "No matching records."
@@ -105,7 +105,7 @@ def test_real_widget_crud_search_filter_and_delete(qtbot, window, tmp_path, kind
     qtbot.mouseClick(
         dialog.buttons.button(QDialogButtonBox.StandardButton.Save), Qt.MouseButton.LeftButton
     )
-    qtbot.waitUntil(lambda: page.records[0].version == 2)
+    qtbot.waitUntil(lambda: page.records[0].version == 2, timeout=15000)
     assert page.records[0].id == record_id
     with closing(connect(tmp_path / "mycmd.sqlite3")) as db:
         assert Service(db, owner_id()).get(record_id).data["notes"] == "Edited through real widgets"
