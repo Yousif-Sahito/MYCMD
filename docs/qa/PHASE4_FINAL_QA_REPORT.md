@@ -77,8 +77,8 @@ All executed full-suite cases returned exit code 0.
 ## Git
 
 - Working branch: `main`.
-- Final verified commit: `0f8f1a5cf1ed70a34950301611a45c7b22a1b08a`.
-- GitHub Actions run: [45249418579](https://github.com/Yousif-Sahito/MYCMD/actions/runs/45249418579).
+- Final verified code commit: `58049c97e3aa5972c91d6f33a75502630e2693ce`.
+- GitHub Actions run: [45252375685](https://github.com/Yousif-Sahito/MYCMD/actions/runs/45252375685).
 - Windows job: passed.
 - Ubuntu job: passed under Xvfb.
 
