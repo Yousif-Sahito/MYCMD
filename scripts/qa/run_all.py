@@ -86,11 +86,15 @@ def ci_result(run: str | None, output: Path, local: bool) -> Result:
             any(platform in job["name"] and job["conclusion"] == "success" for job in jobs)
             for platform in ("windows", "ubuntu")
         ]
+        mysql_success = any(
+            job["name"] == "mysql" and job["conclusion"] == "success" for job in jobs
+        )
         valid = (
             evidence["headSha"] == head
             and evidence["status"] == "completed"
             and evidence["conclusion"] == "success"
             and all(platforms)
+            and mysql_success
         )
         result.status = "PASS" if valid else "BLOCKED"
         result.detail += "; exact HEAD and successful Windows/Ubuntu jobs required"
@@ -185,7 +189,13 @@ def main() -> int:
             )
     results.append(execute("O-git-hygiene", ["git", "diff", "--check"], output))
     results.append(ci_result(args.ci_run, output, args.local))
-    success = all(item.status == "PASS" for item in results if item.mandatory)
+    success = all(
+        item.status in {"PASS", "SKIPPED"}
+        if item.stage == "W-phase6-mysql" and args.local
+        else item.status == "PASS"
+        for item in results
+        if item.mandatory
+    )
     report = {
         "created_at": datetime.now(UTC).isoformat(),
         "scope": "local" if args.local else "release",
