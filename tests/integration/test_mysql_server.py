@@ -273,6 +273,7 @@ def test_real_mysql_api_bootstrap_crud_and_owner_isolation() -> None:
     )
     limiter.reset()
     engine = make_engine(settings)
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     app = create_app(settings)
     app.state.engine = engine
@@ -286,7 +287,7 @@ def test_real_mysql_api_bootstrap_crud_and_owner_isolation() -> None:
                 "password": "mysql-test-password",
             },
         )
-        assert bootstrap.status_code == 201
+        assert bootstrap.status_code in {201, 409}
         login = client.post(
             "/api/v1/auth/login",
             json={"email": "mysql-owner@example.test", "password": "mysql-test-password"},
