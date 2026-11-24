@@ -1,3 +1,22 @@
+# Phase 6 — authenticated API implementation (in progress)
+
+The server package under `server/app` now provides FastAPI health/public/auth/routes,
+SQLAlchemy models/repositories, Alembic migration 001 and Docker MySQL infrastructure.
+Argon2id, signed access tokens and hashed rotated refresh sessions are implemented.
+Private entity routes enforce owner scope and optimistic versions.
+
+Local verification:
+
+- Ruff format/lint: passed.
+- Strict mypy: passed for 40 source files.
+- API tests: 6 passed; 2 real-MySQL tests skipped without a disposable URL.
+- Full pytest suite: 81 passed, 7 skipped.
+- Source and clean-installed-wheel API smoke: passed.
+- sdist/wheel build: passed; wheel includes `src/mycmd` and `server`.
+
+Real MySQL migration/API integration and exact-SHA Windows/Ubuntu CI remain blocked
+until the service-container job executes successfully.
+
 # Phase 5 — public portfolio implementation
 
 Phase 5 source implementation is under `apps/portfolio`. The React/TypeScript

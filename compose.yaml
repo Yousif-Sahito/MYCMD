@@ -1,0 +1,20 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: mycmd_test
+      MYSQL_USER: mycmd
+      MYSQL_PASSWORD: mycmd-test-only
+      MYSQL_ROOT_PASSWORD: mycmd-root-test-only
+    ports:
+      - "127.0.0.1:3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-umycmd", "-pmycmd-test-only"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - mycmd-mysql:/var/lib/mysql
+
+volumes:
+  mycmd-mysql:

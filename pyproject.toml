@@ -29,9 +29,20 @@ dev = [
 gui = [
     "pyside6>=6.8,<7",
 ]
+server = [
+    "alembic>=1.17,<2",
+    "argon2-cffi>=25.1,<26",
+    "fastapi>=0.121,<1",
+    "httpx>=0.28,<1",
+    "pymysql>=1.1,<2",
+    "pyjwt>=2.10,<3",
+    "slowapi>=0.1.9,<1",
+    "sqlalchemy>=2.0,<3",
+    "uvicorn>=0.38,<1",
+]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mycmd"]
+packages = ["src/mycmd", "server"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -49,6 +60,7 @@ extend-exclude = [".tools"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+per-file-ignores = {"server/app/api/routes.py" = ["B008"], "server/app/dependencies.py" = ["B008"]}
 
 [tool.mypy]
 python_version = "3.13"

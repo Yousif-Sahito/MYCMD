@@ -139,6 +139,8 @@ def main() -> int:
         ("T-frontend-build", [npm, "run", "build", "--prefix", "apps/portfolio"]),
         ("U-frontend-browser", [npm, "run", "e2e:install", "--prefix", "apps/portfolio"]),
         ("U-frontend-e2e", [npm, "run", "e2e", "--prefix", "apps/portfolio"]),
+        ("V-phase6-api", [python, "scripts/check_phase6_api.py"]),
+        ("W-phase6-mysql", pytest + ["tests/integration/test_mysql_server.py"]),
     ]
     results = []
     for stage, command in stages:

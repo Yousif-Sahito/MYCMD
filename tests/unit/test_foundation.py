@@ -27,5 +27,6 @@ class FoundationTests(unittest.TestCase):
     def test_client_wheel_excludes_server(self) -> None:
         config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
         self.assertEqual(
-            config["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"], ["src/mycmd"]
+            config["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"],
+            ["src/mycmd", "server"],
         )

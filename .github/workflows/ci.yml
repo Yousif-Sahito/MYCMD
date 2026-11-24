@@ -22,7 +22,7 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y xvfb libegl1 libopengl0 libxcb-cursor0 libxcb1 libx11-xcb1 libxcb-util1 libxcb-keysyms1 libxcb-image0 libxcb-shm0 libxcb-icccm4 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libnss3 libasound2t64 libgtk-3-0
       - run: uv lock --check
-      - run: uv sync --frozen --extra dev --extra gui
+      - run: uv sync --frozen --extra dev --extra gui --extra server
       - run: uv pip check
       - name: Windows full quality gates
         if: runner.os == 'Windows'
@@ -87,3 +87,42 @@ jobs:
             apps/portfolio/test-results/
             apps/portfolio/playwright-report/
             apps/portfolio/dist/
+  mysql:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: mycmd_test
+          MYSQL_USER: mycmd
+          MYSQL_PASSWORD: mycmd-test-only
+          MYSQL_ROOT_PASSWORD: mycmd-root-test-only
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -umycmd -pmycmd-test-only"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: astral-sh/setup-uv@v6
+      - run: uv lock --check
+      - run: uv sync --frozen --extra dev --extra server
+      - name: Run MySQL migrations
+        shell: bash
+        env:
+          DATABASE_URL: mysql+pymysql://mycmd:mycmd-test-only@127.0.0.1:3307/mycmd_test
+        run: uv run --frozen --extra server alembic upgrade head
+      - name: Run MySQL and API tests
+        shell: bash
+        env:
+          DATABASE_URL: mysql+pymysql://mycmd:mycmd-test-only@127.0.0.1:3307/mycmd_test
+          MYCMD_MYSQL_TEST_URL: mysql+pymysql://mycmd:mycmd-test-only@127.0.0.1:3307/mycmd_test
+          MYCMD_SECRET_KEY: ci-phase6-secret-key-at-least-32-characters
+          MYCMD_BOOTSTRAP_TOKEN: ci-phase6-bootstrap-token
+        run: uv run --frozen --extra dev --extra server pytest -q tests/integration/test_mysql_server.py tests/integration/test_server.py

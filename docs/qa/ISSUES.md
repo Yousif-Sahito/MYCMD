@@ -33,3 +33,16 @@ No unresolved CRITICAL or HIGH security findings were found.
 
 No unresolved CRITICAL or HIGH findings remain. Final exact-SHA GitHub Actions
 run `45298690921` passed all four matrix jobs.
+
+## Phase 6 blockers
+
+- Docker CLI was unavailable locally. Docker Compose verification is delegated to
+  the Ubuntu GitHub Actions service-container job.
+- No disposable `MYCMD_MYSQL_TEST_URL` was available locally. Real MySQL tests are
+  marked and skipped until that environment variable is supplied.
+- No CRITICAL or HIGH Phase 6 security finding is currently recorded.
+- Phase 6 API route closures now bind kind explicitly; no client `kind_name` override remains.
+- Refresh sessions use `SELECT ... FOR UPDATE`; record CRUD uses `SELECT ... FOR UPDATE`.
+- Logout verifies the refresh session belongs to the authenticated user.
+- Bootstrap remains application-level and needs a singleton invariant before real multi-owner release.
+- Real MySQL and migration results remain BLOCKED locally until a disposable URL/CI job executes.
