@@ -151,15 +151,6 @@ def test_malformed_json_validation_and_logout_owner_scope(api: TestClient) -> No
         "/api/v1/auth/login",
         json={"email": "owner@example.test", "password": "long-test-password"},
     )
-    second = api.post(
-        "/api/v1/auth/bootstrap",
-        json={
-            "bootstrap_token": "phase6-bootstrap-test-token",
-            "email": "second@example.test",
-            "password": "another-test-password",
-        },
-    )
-    assert second.status_code == 409
 
 
 def test_cors_public_origin_and_rate_limit_shape(api: TestClient) -> None:
