@@ -57,3 +57,10 @@ portfolio jobs. No unresolved CRITICAL or HIGH Phase 6 findings remain.
 - Real-MySQL test coverage is present in `test_mysql_server.py`, but local execution
   is skipped without `MYCMD_MYSQL_TEST_URL`.
 - Docker CLI is unavailable locally, and Kali-specific validation remains unperformed.
+
+## Final Phase 7 disposition
+
+Exact-SHA run `45457324606` passed Windows and Ubuntu Python jobs, both portfolio jobs,
+and the MySQL 8.4 migration/API job at SHA `7c84dda230ea61b9b0a35d2f4439c7c2606b2dc5`.
+No unresolved CRITICAL or HIGH Phase 7 findings remain. Kali-specific validation remains
+unverified and must not be represented as direct Kali compatibility evidence.
