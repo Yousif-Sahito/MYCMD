@@ -189,13 +189,14 @@ def main() -> int:
             )
     results.append(execute("O-git-hygiene", ["git", "diff", "--check"], output))
     results.append(ci_result(args.ci_run, output, args.local))
-    success = all(
-        item.status in {"PASS", "SKIPPED"}
-        if item.stage == "W-phase6-mysql" and args.local
-        else item.status == "PASS"
-        for item in results
-        if item.mandatory
-    )
+    success = True
+    for item in results:
+        if not item.mandatory:
+            continue
+        if args.local and item.stage == "W-phase6-mysql" and item.status == "SKIPPED":
+            continue
+        if item.status != "PASS":
+            success = False
     report = {
         "created_at": datetime.now(UTC).isoformat(),
         "scope": "local" if args.local else "release",
