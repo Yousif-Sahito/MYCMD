@@ -110,8 +110,20 @@ class SyncRepository:
                 results.append(result)
             self.db.commit()
         except IntegrityError:
+            operation_ids = [str(operation["operation_id"]) for operation in operations]
             self.db.rollback()
-            raise
+            replayed: list[dict[str, Any]] = []
+            for operation_id in operation_ids:
+                existing = self.db.scalar(
+                    select(SyncOperation).where(
+                        SyncOperation.owner_id == owner_id,
+                        SyncOperation.operation_id == operation_id,
+                    )
+                )
+                if existing is None:
+                    raise
+                replayed.append(existing.response_json)
+            return replayed
         return results
 
     def pull(self, owner_id: str, cursor: int, limit: int) -> tuple[list[ChangeLog], int]:

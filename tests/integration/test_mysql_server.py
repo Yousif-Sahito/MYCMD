@@ -8,6 +8,7 @@ from sqlalchemy import create_engine, select, text
 
 from mycmd.core.service import Service
 from mycmd.storage.database import connect
+from server.app.api.routes import limiter
 from server.app.config import Settings
 from server.app.db.base import Base
 from server.app.db.models import ChangeLog, Record, SyncOperation
@@ -44,6 +45,7 @@ def test_real_mysql_concurrent_duplicate_push_is_one_mutation() -> None:
         public_origin="http://127.0.0.1:5173",
         bootstrap_token="phase7-concurrent-bootstrap-token",
     )
+    limiter.reset()
     engine = make_engine(settings)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
@@ -137,6 +139,7 @@ def test_real_mysql_sync_push_pull_idempotency_and_tombstone() -> None:
         public_origin="http://127.0.0.1:5173",
         bootstrap_token="phase7-real-mysql-bootstrap-token",
     )
+    limiter.reset()
     engine = make_engine(settings)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
@@ -268,6 +271,7 @@ def test_real_mysql_api_bootstrap_crud_and_owner_isolation() -> None:
         public_origin="http://127.0.0.1:5173",
         bootstrap_token="real-mysql-bootstrap-token",
     )
+    limiter.reset()
     engine = make_engine(settings)
     Base.metadata.create_all(engine)
     app = create_app(settings)
@@ -324,6 +328,7 @@ def test_real_mysql_two_device_conflict_and_tombstone(tmp_path) -> None:
         public_origin="http://127.0.0.1:5173",
         bootstrap_token="phase7-two-device-bootstrap-token",
     )
+    limiter.reset()
     engine = make_engine(settings)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

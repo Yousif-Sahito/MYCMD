@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from server.app.api.routes import limiter
 from server.app.config import Settings
 from server.app.db.base import Base
 from server.app.db.session import make_engine, make_session_factory
@@ -11,6 +12,7 @@ from server.app.main import create_app
 
 @pytest.fixture
 def api(tmp_path: Path) -> TestClient:
+    limiter.reset()
     database = tmp_path / "phase6.sqlite3"
     settings = Settings(
         database_url=f"sqlite+pysqlite:///{database}",
