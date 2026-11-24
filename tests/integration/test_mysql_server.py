@@ -53,34 +53,32 @@ def test_real_mysql_api_bootstrap_crud_and_owner_isolation() -> None:
                 "password": "mysql-test-password",
             },
         )
-        assert bootstrap.status_code in {201, 409}
+        assert bootstrap.status_code == 201
         login = client.post(
             "/api/v1/auth/login",
             json={"email": "mysql-owner@example.test", "password": "mysql-test-password"},
         )
-        assert login.status_code in {200, 401}
-        if login.status_code == 200:
-            headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
-            created = client.post(
-                "/api/v1/projects",
-                headers=headers,
-                json={
-                    "data": {
-                        "slug": "mysql-phase6",
-                        "title": "Real MySQL Phase 6",
-                        "status": "active",
-                        "technologies": ["FastAPI", "MySQL"],
-                        "links": [],
-                    }
-                },
-            )
-            assert created.status_code in {201, 422}
-            if created.status_code == 201:
-                record = created.json()
-                stale = client.patch(
-                    f"/api/v1/projects/{record['id']}",
-                    headers=headers,
-                    json={"expected_version": 1, "data": {"notes": "first"}},
-                )
-                assert stale.status_code in {200, 409}
+        assert login.status_code == 200
+        headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+        created = client.post(
+            "/api/v1/projects",
+            headers=headers,
+            json={
+                "data": {
+                    "slug": "mysql-phase6",
+                    "title": "Real MySQL Phase 6",
+                    "status": "active",
+                    "technologies": ["FastAPI", "MySQL"],
+                    "links": [],
+                }
+            },
+        )
+        assert created.status_code == 201
+        record = created.json()
+        stale = client.patch(
+            f"/api/v1/projects/{record['id']}",
+            headers=headers,
+            json={"expected_version": 1, "data": {"notes": "first"}},
+        )
+        assert stale.status_code == 200
     engine.dispose()
