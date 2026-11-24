@@ -13,3 +13,18 @@ Phase 4 source, lifecycle, security, accessibility or release reviews.
   offscreen and native Windows automation evidence.
 - Detached process descendants and shell-exits-first ConPTY cleanup remain outside
   the ordinary foreground-child terminal coverage.
+
+## Phase 5 findings
+
+No unresolved CRITICAL or HIGH security findings were found.
+
+| ID | Severity | Reviewer | Finding | Disposition | Verification |
+| --- | --- | --- | --- | --- | --- |
+| P5-01 | MEDIUM | Architecture/Terminal | xterm Up/Down history could use stale React state | Fixed by using `historyRef.current` for arrow navigation | Unit/E2E source review |
+| P5-02 | MEDIUM | Architecture | Terminal font setting was stored but not applied | Fixed by reading the persisted font size in xterm initialization | Typecheck/build pass |
+| P5-03 | LOW | Architecture | Printable paste could contain multiple characters | Fixed by handling multi-character printable input | Playwright pass |
+| P5-04 | HIGH | Accessibility | Light-theme primary and completed text contrast could be insufficient | Fixed with white primary text and darker completed badge text | Axe desktop sweep pending exact-SHA rerun |
+| P5-05 | MEDIUM | Public Data | Public URL policy accepted HTTP/private/credential URLs | Fixed to require HTTPS and reject credentials/private hosts | Public-data unit tests |
+| P5-06 | MEDIUM | Public Data | Public data schema validated only project slugs/URLs | Expanded profile URL validation and project data checks | Public-data unit tests |
+| P5-07 | MEDIUM | Accessibility | Terminal lacked an assistive fallback/description | Added `aria-describedby` and accessible visually-hidden/mobile fallback | Playwright pass |
+| P5-08 | LOW | Release | CI omitted dist artifact upload | Added `apps/portfolio/dist` upload | Workflow source review |

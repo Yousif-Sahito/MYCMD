@@ -33,3 +33,17 @@ Source: blueprint sections 1–25. Implementation status is tracked separately.
 The client wheel includes only `src/mycmd`; server and portfolio are separate artifacts.
 The platform-specific `pywinpty` runtime dependency is locked only on Windows.
 Terminal integration tests exercise real commands and persistent shell state on both OSes.
+
+## Phase 5 public portfolio surface
+
+The public portfolio is a separate Vite/React/TypeScript application under
+`apps/portfolio`. It uses checked-in curated public data and a typed, allowlisted
+portfolio command registry. The browser terminal may use xterm.js for presentation,
+but it has no imports or runtime dependencies on `mycmd.terminal`, SQLite, the desktop
+Qt bridge or any network command endpoint.
+
+Public routes remain conventional navigation routes, with project deep links supported
+by static-hosting rewrite rules. Theme, terminal font size and reduced-motion preferences
+are stored in browser storage only. External URLs are validated before rendering or
+opening. Missing education and certificate content is displayed as an explicit
+unconfigured state rather than fabricated public data.

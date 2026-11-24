@@ -42,3 +42,48 @@ jobs:
             .tools/phase4-qa/*.md
             .tools/phase4-qa/*.xml
             .tools/phase4-visual/*.png
+  portfolio:
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/portfolio/package-lock.json
+      - name: Install Linux browser libraries
+        if: runner.os == 'Linux'
+        run: npx playwright install --with-deps chromium
+      - name: Install Windows browser
+        if: runner.os == 'Windows'
+        run: npx playwright install chromium
+      - name: Install locked frontend dependencies
+        working-directory: apps/portfolio
+        run: npm ci
+      - name: TypeScript and lint
+        working-directory: apps/portfolio
+        run: |
+          npm run typecheck
+          npm run lint
+      - name: Unit and component tests
+        working-directory: apps/portfolio
+        run: npm test
+      - name: Production build
+        working-directory: apps/portfolio
+        run: npm run build
+      - name: Desktop and mobile browser tests
+        working-directory: apps/portfolio
+        run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase5-${{ matrix.os }}
+          path: |
+            apps/portfolio/test-results/
+            apps/portfolio/playwright-report/
+            apps/portfolio/dist/

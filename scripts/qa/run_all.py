@@ -113,6 +113,7 @@ def main() -> int:
     output.mkdir(parents=True, exist_ok=True)
     python = sys.executable
     pytest = [python, "-m", "pytest", "-q", "-p", "no:cacheprovider"]
+    npm = shutil.which("npm.cmd") or shutil.which("npm") or "npm"
     stages = [
         ("A-lock", [args.uv, "lock", "--check"]),
         ("A-dependencies", [args.uv, "pip", "check", "--python", python]),
@@ -131,6 +132,13 @@ def main() -> int:
         ("K-security", pytest + ["tests/gui", "-k", "security"]),
         ("K-full-suite", pytest + ["tests"]),
         ("L-build", [args.uv, "build", "--out-dir", str(output / "dist")]),
+        ("P-frontend-deps", [npm, "ci", "--prefix", "apps/portfolio"]),
+        ("Q-frontend-types", [npm, "run", "typecheck", "--prefix", "apps/portfolio"]),
+        ("R-frontend-lint", [npm, "run", "lint", "--prefix", "apps/portfolio"]),
+        ("S-frontend-unit", [npm, "test", "--prefix", "apps/portfolio"]),
+        ("T-frontend-build", [npm, "run", "build", "--prefix", "apps/portfolio"]),
+        ("U-frontend-browser", [npm, "run", "e2e:install", "--prefix", "apps/portfolio"]),
+        ("U-frontend-e2e", [npm, "run", "e2e", "--prefix", "apps/portfolio"]),
     ]
     results = []
     for stage, command in stages:

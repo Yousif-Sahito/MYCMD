@@ -1,3 +1,27 @@
+# Phase 5 — public portfolio implementation
+
+Phase 5 source implementation is under `apps/portfolio`. The React/TypeScript
+application includes public routes, project filtering/detail routes, curated public
+data, an allowlisted terminal parser and registry, xterm.js presentation, mobile
+fallback input, themes, reduced-motion preferences, 404/offline states and Playwright
+visual coverage. The browser terminal has no local terminal, SQL or remote shell
+execution path.
+
+Local frontend evidence:
+
+- Strict TypeScript typecheck: passed.
+- ESLint: passed.
+- Vitest unit/component tests: 15 passed.
+- Production build: passed; TerminalPage is route-lazy-loaded.
+- Playwright Chromium desktop/mobile: 8 passed.
+- Vitest unit/component tests: 17 passed standalone.
+- Public URL/data validation and terminal history/argument fixes: verified.
+- Eight specialist review responsibilities completed; no unresolved CRITICAL or HIGH
+  security findings.
+
+Cross-platform exact-SHA CI and final Phase 5 documentation commit remain to be
+recorded after implementation push.
+
 # Phase 3 — local terminal engine (verified)
 
 The Phase 3 implementation and expanded real-shell tests are committed on `main`

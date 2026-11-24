@@ -39,6 +39,14 @@ dependent work. Skips and unavailable target systems do not count as verificatio
 | 9 | Packaging; FR-10 | OS-specific PyInstaller artifacts and clean Windows/Kali installation/launch; no development dependency assumptions |
 | 10 | Deployment; sections 25, 28 | HTTPS API, isolated MySQL, encrypted tested backups, static portfolio, rollback rehearsal and release checklist |
 
+## Phase 5 implementation status
+
+The React/TypeScript public portfolio is implemented under `apps/portfolio`.
+It includes conventional routes, curated public data, project deep links, an
+allowlisted xterm.js-compatible browser terminal, mobile fallback, themes,
+accessible empty/error states and Playwright visual/browser coverage.
+Exact-SHA cross-platform CI is pending for the first Phase 5 commit.
+
 ## Current milestone status
 
 Phase 0 is complete per user-confirmed local verification and passing Windows and
