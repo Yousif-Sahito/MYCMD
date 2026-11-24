@@ -20,7 +20,7 @@ SHA: `9747d559b340c1a67b07b2b011ad567cabf6ada4`
 
 ## Final documentation revision
 
-Final HEAD: `898b50138b4744ef3bcf8a89ef3c5148a05032cc`
-Final CI run: https://github.com/Yousif-Sahito/MYCMD/actions/runs/45350847792
+Final HEAD: `c47c00e906cfd8239759df9ded4daef22b8ceb9a`
+Final CI run: https://github.com/Yousif-Sahito/MYCMD/actions/runs/45351699741
 
-The MySQL job and both platform Python and portfolio jobs passed for this revision.
+The MySQL job and both platform Python and portfolio jobs passed for this final revision.
