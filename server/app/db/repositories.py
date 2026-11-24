@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from typing import Any
+from uuid import uuid4
 
 from sqlalchemy import String, func, select
 from sqlalchemy.exc import IntegrityError
@@ -59,6 +60,7 @@ class RecordRepository:
         except ValidationError as exc:
             raise ValueError(str(exc)) from exc
         record = Record(
+            id=str(uuid4()),
             owner_id=owner_id,
             kind=kind,
             data=validated,

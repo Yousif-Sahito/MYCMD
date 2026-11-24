@@ -115,6 +115,51 @@ def test_future_and_corrupt_database_preserved(tmp_path):
     assert bad.read_bytes() == b"not a database"
 
 
+def test_phase7_schema_conflicts_and_cursor_persist(service):
+    service.db.execute(
+        "INSERT INTO sync_status(owner_id,last_cursor,last_success_at,status,last_error) "
+        "VALUES(?,?,?,?,?)",
+        (service.owner_id, 42, "2026-11-24T12:00:00+00:00", "idle", None),
+    )
+    service.db.execute(
+        "INSERT INTO local_conflicts("
+        "id,owner_id,entity_type,entity_id,local_json,server_json,"
+        "local_version,server_version,conflict_type,state,created_at,resolved_at"
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,NULL)",
+        (
+            str(uuid4()),
+            service.owner_id,
+            "projects",
+            str(uuid4()),
+            '{"title":"Local"}',
+            '{"title":"Server"}',
+            3,
+            4,
+            "optimistic_version",
+            "pending",
+            "2026-11-24T12:00:00+00:00",
+        ),
+    )
+    service.db.commit()
+    reopened_db = connect(service.db.execute("PRAGMA database_list").fetchone()[2])
+    reopened = Service(reopened_db, service.owner_id)
+    assert (
+        reopened.db.execute(
+            "SELECT last_cursor FROM sync_status WHERE owner_id=?",
+            (reopened.owner_id,),
+        ).fetchone()["last_cursor"]
+        == 42
+    )
+    assert (
+        reopened.db.execute(
+            "SELECT COUNT(*) AS count FROM local_conflicts WHERE owner_id=? AND state='pending'",
+            (reopened.owner_id,),
+        ).fetchone()["count"]
+        == 1
+    )
+    reopened_db.close()
+
+
 def test_process_exit_rolls_back_uncommitted_mutation(service, tmp_path):
     record = service.create("projects", EXAMPLES["projects"])
     script = """

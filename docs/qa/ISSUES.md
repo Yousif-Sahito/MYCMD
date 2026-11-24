@@ -48,3 +48,12 @@ run `45298690921` passed all four matrix jobs.
 
 Exact-SHA run `45347902966` passed the MySQL job, both Python jobs and both
 portfolio jobs. No unresolved CRITICAL or HIGH Phase 6 findings remain.
+
+## Phase 7 completion recovery
+
+- Manual keep-server, keep-local and manual-merge resolution code is implemented.
+- Unit tests verify invalid merge rejection, version-checked merge queueing and
+  explicit keep-server resolution.
+- Real-MySQL test coverage is present in `test_mysql_server.py`, but local execution
+  is skipped without `MYCMD_MYSQL_TEST_URL`.
+- Docker CLI is unavailable locally, and Kali-specific validation remains unperformed.

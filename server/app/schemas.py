@@ -92,3 +92,44 @@ class PageResponse(APIModel):
     page: int
     page_size: int
     total: int
+
+
+class SyncOperationRequest(APIModel):
+    operation_id: UUID
+    device_id: UUID
+    entity_type: Literal["projects", "skills", "education", "certificates", "milestones"]
+    entity_id: UUID
+    action: Literal["create", "update", "delete"]
+    base_version: int = Field(ge=0)
+    payload: dict[str, Any]
+
+
+class SyncPushRequest(APIModel):
+    operations: list[SyncOperationRequest] = Field(min_length=1, max_length=100)
+
+
+class SyncOperationResult(APIModel):
+    operation_id: UUID
+    status: Literal["accepted", "conflict", "rejected"]
+    record: RecordResponse | None = None
+    server_record: RecordResponse | None = None
+    error: str | None = None
+
+
+class SyncPushResponse(APIModel):
+    results: list[SyncOperationResult]
+
+
+class SyncPullItem(APIModel):
+    sequence: int
+    entity_type: str
+    entity_id: UUID
+    version: int
+    changed_at: datetime
+    tombstone: bool
+    record: RecordResponse | None = None
+
+
+class SyncPullResponse(APIModel):
+    items: list[SyncPullItem]
+    next_cursor: int

@@ -166,3 +166,79 @@ def test_cors_public_origin_and_rate_limit_shape(api: TestClient) -> None:
     )
     assert disallowed.status_code == 200
     assert "access-control-allow-origin" not in disallowed.headers
+
+
+def test_sync_push_pull_duplicate_and_conflict(api: TestClient) -> None:
+    headers = auth(api)
+    operation_id = "11111111-1111-4111-8111-111111111111"
+    entity_id = "22222222-2222-4222-8222-222222222222"
+    device_id = "33333333-3333-4333-8333-333333333333"
+    operation = {
+        "operation_id": operation_id,
+        "device_id": device_id,
+        "entity_type": "projects",
+        "entity_id": entity_id,
+        "action": "create",
+        "base_version": 0,
+        "payload": {
+            "slug": "sync-project",
+            "title": "Sync Project",
+            "status": "active",
+            "technologies": [],
+            "links": [],
+        },
+    }
+    pushed = api.post(
+        "/api/v1/sync/push",
+        headers=headers,
+        json={"operations": [operation]},
+    )
+    assert pushed.status_code == 200
+    first = pushed.json()["results"][0]
+    assert first["status"] == "accepted"
+
+    repeated = api.post(
+        "/api/v1/sync/push",
+        headers=headers,
+        json={"operations": [operation]},
+    )
+    assert repeated.status_code == 200
+    assert repeated.json()["results"][0]["status"] == "accepted"
+    assert repeated.json()["results"][0] == first
+
+    server_edit = api.patch(
+        f"/api/v1/projects/{entity_id}",
+        headers=headers,
+        json={
+            "expected_version": 1,
+            "data": {"notes": "Server won first"},
+        },
+    )
+    assert server_edit.status_code == 200
+
+    stale_update = dict(operation)
+    stale_update.update(
+        {
+            "operation_id": "44444444-4444-4444-8444-444444444444",
+            "action": "update",
+            "base_version": 1,
+            "payload": {"notes": "stale"},
+        }
+    )
+    conflict = api.post(
+        "/api/v1/sync/push",
+        headers=headers,
+        json={"operations": [stale_update]},
+    )
+    assert conflict.status_code == 200
+    assert conflict.json()["results"][0]["status"] == "conflict"
+
+    pulled = api.get(
+        "/api/v1/sync/pull?cursor=0&limit=100",
+        headers=headers,
+    )
+    assert pulled.status_code == 200
+    body = pulled.json()
+    assert len(body["items"]) == 1
+    assert body["items"][0]["entity_id"] == entity_id
+    assert body["next_cursor"] >= 1

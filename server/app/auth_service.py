@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from server.app.config import Settings
-from server.app.db.models import RefreshSession, User
+from server.app.db.models import BootstrapState, RefreshSession, User
 from server.app.security import (
     access_token,
     decode_access,
@@ -24,7 +24,12 @@ class AuthService:
     def bootstrap(self, email: str, password: str, bootstrap_token: str) -> User:
         if not self.settings.bootstrap_token or bootstrap_token != self.settings.bootstrap_token:
             raise PermissionError("Invalid bootstrap token")
+        state = self.db.scalar(
+            select(BootstrapState).where(BootstrapState.id == "singleton").with_for_update()
+        )
         existing = self.db.scalar(select(User).limit(1))
+        if state is not None and state.provisioned:
+            raise LookupError("Initial owner already exists")
         if existing is not None:
             raise LookupError("Initial owner already exists")
         email = email.strip().lower()
@@ -32,7 +37,16 @@ class AuthService:
             raise LookupError("Initial owner already exists")
         user = User(email=email, password_hash=hash_password(password), status="active")
         self.db.add(user)
-        self.db.commit()
+        if state is None:
+            state = BootstrapState(id="singleton", provisioned=True)
+            self.db.add(state)
+        else:
+            state.provisioned = True
+        try:
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
         self.db.refresh(user)
         return user
 

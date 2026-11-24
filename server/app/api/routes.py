@@ -4,11 +4,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from server.app.auth_service import AuthService
 from server.app.db.models import Record, User
 from server.app.db.repositories import RecordRepository
+from server.app.db.sync_repository import SyncRepository
 from server.app.dependencies import current_user, get_db
 from server.app.schemas import (
     BootstrapRequest,
@@ -18,6 +20,11 @@ from server.app.schemas import (
     RecordResponse,
     RecordUpdate,
     RefreshRequest,
+    SyncOperationResult,
+    SyncPullItem,
+    SyncPullResponse,
+    SyncPushRequest,
+    SyncPushResponse,
     TokenResponse,
     UserResponse,
 )
@@ -218,6 +225,47 @@ def register_entity_routes() -> APIRouter:
 
 
 router.include_router(register_entity_routes())
+
+
+@router.post("/sync/push")
+async def sync_push(
+    body: SyncPushRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(current_user),
+) -> SyncPushResponse:
+    operations = [operation.model_dump(mode="json") for operation in body.operations]
+    try:
+        results = SyncRepository(db).push(user.id, operations)
+    except (ValueError, IntegrityError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return SyncPushResponse(results=[SyncOperationResult.model_validate(row) for row in results])
+
+
+@router.get("/sync/pull")
+async def sync_pull(
+    cursor: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user: User = Depends(current_user),
+) -> SyncPullResponse:
+    rows, next_cursor = SyncRepository(db).pull(user.id, cursor, limit)
+    items: list[SyncPullItem] = []
+    for row in rows:
+        record = None
+        if not row.tombstone and row.record_json is not None:
+            record = RecordResponse.model_validate(row.record_json)
+        items.append(
+            SyncPullItem(
+                sequence=row.sequence,
+                entity_type=row.entity_type,
+                entity_id=UUID(row.entity_id),
+                version=row.version,
+                changed_at=row.changed_at,
+                tombstone=row.tombstone,
+                record=record,
+            )
+        )
+    return SyncPullResponse(items=items, next_cursor=next_cursor)
 
 
 @router.get("/public/portfolio")

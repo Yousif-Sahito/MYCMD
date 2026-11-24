@@ -63,3 +63,50 @@ class Record(Base):
             name="ck_records_kind",
         ),
     )
+
+
+class SyncOperation(Base):
+    __tablename__ = "sync_operations"
+
+    owner_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    operation_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    device_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    entity_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    entity_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    action: Mapped[str] = mapped_column(String(16), nullable=False)
+    base_version: Mapped[int] = mapped_column(nullable=False)
+    response_json: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    committed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+
+
+class ChangeLog(Base):
+    __tablename__ = "change_log"
+
+    sequence: Mapped[int] = mapped_column(primary_key=True, autoincrement=False)
+    owner_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    entity_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    entity_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    version: Mapped[int] = mapped_column(nullable=False)
+    changed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
+    tombstone: Mapped[bool] = mapped_column(nullable=False, default=False)
+    record_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+
+    __table_args__ = (Index("ix_change_log_owner_sequence", "owner_id", "sequence"),)
+
+
+class SyncCursor(Base):
+    __tablename__ = "sync_cursor"
+
+    owner_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    sequence: Mapped[int] = mapped_column(nullable=False, default=0)
+
+
+class BootstrapState(Base):
+    __tablename__ = "bootstrap_state"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    provisioned: Mapped[bool] = mapped_column(nullable=False, default=False)

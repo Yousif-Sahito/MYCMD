@@ -209,3 +209,89 @@ def search(text: Annotated[str, typer.Argument()]) -> None:
         rows = [r for r in service().list(kind) if query in str(r.data).casefold()]
         if rows:
             render(rows, kind)
+
+
+@app.command("sync")
+def sync_command(
+    dry_run: bool = typer.Option(False, "--dry-run"),
+) -> None:
+    db = service()
+    if dry_run:
+        rows = db.pending()
+        typer.echo(f"Dry run: {len(rows)} queued operation(s)")
+        return
+    base_url = os.environ.get("MYCMD_API_URL")
+    access_token = os.environ.get("MYCMD_ACCESS_TOKEN")
+    if not base_url or not access_token:
+        fail("Set MYCMD_API_URL and MYCMD_ACCESS_TOKEN before sync", 3)
+    from mycmd.api_client.client import ApiClient
+    from mycmd.sync.coordinator import SyncCoordinator
+
+    result = SyncCoordinator(db, ApiClient(base_url, access_token)).run()
+    typer.echo(f"Sync status: {result['status']}")
+    if result.get("error"):
+        fail(str(result["error"]), 3)
+
+
+conflicts_app = typer.Typer(
+    help="List and resolve durable synchronization conflicts.",
+    add_completion=False,
+    rich_markup_mode=None,
+    pretty_exceptions_enable=False,
+)
+
+
+@conflicts_app.command("list")
+def conflicts_list() -> None:
+    db = service()
+    rows = db.db.execute(
+        "SELECT * FROM local_conflicts WHERE owner_id=? AND state='pending' ORDER BY created_at",
+        (db.owner_id,),
+    ).fetchall()
+    if not rows:
+        typer.echo("No pending conflicts")
+        return
+    for row in rows:
+        typer.echo(
+            f"{row['id']}  {row['entity_type']}:{row['entity_id']}  "
+            f"{row['conflict_type']}  {row['state']}"
+        )
+
+
+@conflicts_app.command("resolve")
+def conflicts_resolve(
+    conflict_id: str,
+    keep: str = typer.Option(..., "--keep", help="local, server, or merge"),
+    merge_json: str | None = typer.Option(None, "--merge-json"),
+) -> None:
+    if keep not in {"local", "server", "merge"}:
+        fail("Use --keep local, --keep server, or --keep merge")
+    import json
+
+    from mycmd.api_client.client import ApiClient
+    from mycmd.sync.coordinator import SyncCoordinator
+
+    base_url = os.environ.get("MYCMD_API_URL")
+    access_token = os.environ.get("MYCMD_ACCESS_TOKEN")
+    if not base_url or not access_token:
+        fail("Set MYCMD_API_URL and MYCMD_ACCESS_TOKEN before conflict resolution", 3)
+    db = service()
+    coordinator = SyncCoordinator(db, ApiClient(base_url, access_token))
+    try:
+        if keep == "server":
+            result = coordinator.resolve_keep_server(conflict_id)
+        elif keep == "merge":
+            if merge_json is None:
+                raise ValueError("merge-json is required for --keep merge")
+            merged = json.loads(merge_json)
+            if not isinstance(merged, dict):
+                raise ValueError("merge-json must be a JSON object")
+            result = coordinator.resolve_manual_merge(conflict_id, merged)
+        else:
+            result = coordinator.resolve_keep_local(conflict_id)
+        typer.echo(f"Conflict resolution: {result['status']}")
+    except (LookupError, ValueError, json.JSONDecodeError) as exc:
+        fail(str(exc), 4)
+
+
+app.add_typer(conflicts_app, name="conflicts")

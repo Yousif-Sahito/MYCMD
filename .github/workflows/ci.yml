@@ -125,4 +125,6 @@ jobs:
           MYCMD_MYSQL_TEST_URL: mysql+pymysql://mycmd:mycmd-test-only@127.0.0.1:3307/mycmd_test
           MYCMD_SECRET_KEY: ci-phase6-secret-key-at-least-32-characters
           MYCMD_BOOTSTRAP_TOKEN: ci-phase6-bootstrap-token
-        run: uv run --frozen --extra dev --extra server pytest -q tests/integration/test_mysql_server.py tests/integration/test_server.py
+        run: |
+          test -n "$MYCMD_MYSQL_TEST_URL"
+          uv run --frozen --extra dev --extra server pytest -q tests/integration/test_mysql_server.py tests/integration/test_server.py -rs

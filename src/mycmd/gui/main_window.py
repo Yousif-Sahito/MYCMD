@@ -1,5 +1,6 @@
 """Desktop navigation, live summaries and application lifecycle."""
 
+import os
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QFormLayout,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QListWidget,
@@ -71,7 +73,22 @@ class MainWindow(QMainWindow):
         self.sync = QLabel("Loading local queue…")
         self.sync.setWordWrap(True)
         self.sync.setMargin(24)
-        self.stack.addWidget(self.sync)
+        sync_page = QWidget()
+        sync_layout = QVBoxLayout(sync_page)
+        sync_layout.addWidget(self.sync)
+        sync_buttons = QHBoxLayout()
+        self.sync_button = QPushButton("Synchronize now")
+        self.sync_button.clicked.connect(self.start_sync)
+        sync_buttons.addWidget(self.sync_button)
+        self.retry_button = QPushButton("Retry queued changes")
+        self.retry_button.clicked.connect(self.start_sync)
+        sync_buttons.addWidget(self.retry_button)
+        self.resolve_button = QPushButton("Resolve conflict")
+        self.resolve_button.clicked.connect(self.resolve_conflict)
+        sync_buttons.addWidget(self.resolve_button)
+        sync_layout.addLayout(sync_buttons)
+        sync_layout.addStretch()
+        self.stack.addWidget(sync_page)
         self.stack.addWidget(self.settings_page())
         self.navigation.currentRowChanged.connect(self.navigate)
         self.navigation.setCurrentRow(0)
@@ -112,9 +129,11 @@ class MainWindow(QMainWindow):
         )
         self.sync.setText(
             f"Local synchronization status\n\nPending operations: {pending}"
-            "\n\nChanges are safely queued locally."
-            " Online synchronization is not implemented until Phase 7."
-            " No last-sync timestamp is available."
+            "\n\nChanges remain queued until synchronization is configured."
+            "\nOnline synchronization is not implemented by this desktop action "
+            "until credentials are configured."
+            "\nSet MYCMD_API_URL and MYCMD_ACCESS_TOKEN before using Synchronize now."
+            "\nNo last-sync timestamp is available unless a completed sync is recorded."
         )
         self.ready = True
         self.controller.loaded.emit()
@@ -160,6 +179,91 @@ class MainWindow(QMainWindow):
         layout.addWidget(save)
         layout.addStretch()
         return page
+
+    def start_sync(self) -> None:
+        base_url = os.environ.get("MYCMD_API_URL")
+        access_token = os.environ.get("MYCMD_ACCESS_TOKEN")
+        if not base_url or not access_token:
+            self.show_error("Set MYCMD_API_URL and MYCMD_ACCESS_TOKEN before synchronization")
+            return
+
+        def synchronize(service: object) -> object:
+            from mycmd.api_client.client import ApiClient
+            from mycmd.core.service import Service
+            from mycmd.sync.coordinator import SyncCoordinator
+
+            assert isinstance(service, Service)
+            return SyncCoordinator(service, ApiClient(base_url, access_token)).run()
+
+        self.controller.submit(synchronize, self.sync_result)
+
+    def sync_result(self, result: object) -> None:
+        assert isinstance(result, dict)
+        status = str(result.get("status", "unknown"))
+        error = result.get("error")
+        self.sync.setText(
+            f"Synchronization status: {status}"
+            + (f"\n\nError: {error}" if error else "\n\nSync attempt completed.")
+        )
+        self.refresh()
+
+    def resolve_conflict(self) -> None:
+        conflict_id, ok = QInputDialog.getText(
+            self,
+            "Resolve conflict",
+            "Conflict ID:",
+        )
+        if not ok or not conflict_id.strip():
+            return
+        choice, ok = QInputDialog.getItem(
+            self,
+            "Choose resolution",
+            "Resolution:",
+            ["Keep server", "Keep local", "Manual merge"],
+            0,
+            False,
+        )
+        if not ok:
+            return
+        base_url = os.environ.get("MYCMD_API_URL")
+        access_token = os.environ.get("MYCMD_ACCESS_TOKEN")
+        if not base_url or not access_token:
+            self.show_error("Set MYCMD_API_URL and MYCMD_ACCESS_TOKEN before resolving conflicts")
+            return
+
+        merged_text = None
+        if choice == "Manual merge":
+            merged_text, ok = QInputDialog.getMultiLineText(
+                self,
+                "Manual merge",
+                "Merged record JSON:",
+                "{}",
+            )
+            if not ok:
+                return
+
+        def resolve(service: object) -> object:
+            from mycmd.api_client.client import ApiClient
+            from mycmd.core.service import Service
+            from mycmd.sync.coordinator import SyncCoordinator
+
+            assert isinstance(service, Service)
+            coordinator = SyncCoordinator(
+                service,
+                ApiClient(base_url, access_token),
+            )
+            if choice == "Keep server":
+                return coordinator.resolve_keep_server(conflict_id.strip())
+            if choice == "Keep local":
+                return coordinator.resolve_keep_local(conflict_id.strip())
+            import json
+
+            merged = json.loads(merged_text or "{}")
+            if not isinstance(merged, dict):
+                raise ValueError("Merged record must be a JSON object")
+            return coordinator.resolve_manual_merge(conflict_id.strip(), merged)
+
+        self.controller.submit(resolve, self.sync_result)
 
     def save_preferences(self) -> None:
         preferences = Preferences(

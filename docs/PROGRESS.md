@@ -1,4 +1,30 @@
-# Phase 6 — authenticated API implementation (in progress)
+# Phase 7 — synchronization implementation
+
+Phase 7 server and local synchronization code is implemented and locally verified.
+
+Implemented:
+
+- Durable SQLite Phase 7 conflict/cursor migration.
+- Authenticated server push/pull endpoints.
+- Owner-scoped operation idempotency log and change log.
+- Stable sequential pull cursors.
+- Local HTTP client, bounded retry coordinator and stale outbox recovery.
+- Durable conflict records and retry/failed states.
+- CLI `sync --dry-run`, `sync`, and `conflicts list/resolve` surfaces.
+- PySide6 Sync page and worker-thread synchronization action.
+
+Local evidence:
+
+- 60 non-GUI unit/integration tests passed, 8 platform/external-MySQL tests skipped.
+- 18 storage tests passed.
+- 7 server integration tests passed.
+- 3 real GUI terminal tests passed on repeat.
+- Ruff, strict mypy and focused GUI navigation tests passed.
+
+Real MySQL, exact-SHA CI and two-device/lost-response production evidence remain pending
+until a disposable MySQL test URL and GitHub Actions verification are available.
+
+# Phase 6 — authenticated API implementation (verified)
 
 The server package under `server/app` now provides FastAPI health/public/auth/routes,
 SQLAlchemy models/repositories, Alembic migration 001 and Docker MySQL infrastructure.

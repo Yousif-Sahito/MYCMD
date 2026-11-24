@@ -347,6 +347,7 @@ version = "2.0.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
+    { name = "httpx" },
     { name = "pywinpty", marker = "sys_platform == 'win32'" },
     { name = "rich" },
     { name = "typer" },
@@ -382,6 +383,7 @@ requires-dist = [
     { name = "build", marker = "extra == 'dev'", specifier = ">=1.2,<2" },
     { name = "click", specifier = ">=8.5.1" },
     { name = "fastapi", marker = "extra == 'server'", specifier = ">=0.121,<1" },
+    { name = "httpx", specifier = ">=0.28,<1" },
     { name = "httpx", marker = "extra == 'server'", specifier = ">=0.28,<1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.15,<2" },
     { name = "pyjwt", marker = "extra == 'server'", specifier = ">=2.10,<3" },
