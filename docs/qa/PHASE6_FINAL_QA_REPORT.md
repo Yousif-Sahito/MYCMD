@@ -17,3 +17,8 @@ SHA: `6907b7a3c4264c2afca5fe78ea30af994a36f5f9`
 - Python Ubuntu: PASS
 - Portfolio Windows: PASS
 - Portfolio Ubuntu: PASS
+
+## Final documentation revision
+
+Final HEAD: `4684a53aca53ebdb04d31851cf12744a6b155ff2`
+Final CI run: https://github.com/Yousif-Sahito/MYCMD/actions/runs/45348846247
