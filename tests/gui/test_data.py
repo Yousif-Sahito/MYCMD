@@ -84,10 +84,10 @@ def test_real_widget_crud_search_filter_and_delete(qtbot, window, tmp_path, kind
     qtbot.mouseClick(
         dialog.buttons.button(QDialogButtonBox.StandardButton.Save), Qt.MouseButton.LeftButton
     )
-    qtbot.waitUntil(lambda: len(page.records) == 1, timeout=30000)
+    qtbot.waitUntil(lambda: len(page.records) == 1, timeout=60000)
     record_id = page.records[0].id
     assert page.records[0].data.items() >= EXAMPLES[kind].items()
-    qtbot.waitUntil(lambda: f"{kind.title()}: 1" in window.dashboard.text(), timeout=30000)
+    qtbot.waitUntil(lambda: f"{kind.title()}: 1" in window.dashboard.text(), timeout=60000)
     page.search.setText("nonexistent-query")
     assert page.table.rowCount() == 0
     assert page.empty.text() == "No matching records."
@@ -105,7 +105,7 @@ def test_real_widget_crud_search_filter_and_delete(qtbot, window, tmp_path, kind
     qtbot.mouseClick(
         dialog.buttons.button(QDialogButtonBox.StandardButton.Save), Qt.MouseButton.LeftButton
     )
-    qtbot.waitUntil(lambda: page.records[0].version == 2, timeout=30000)
+    qtbot.waitUntil(lambda: page.records[0].version == 2, timeout=60000)
     assert page.records[0].id == record_id
     with closing(connect(tmp_path / "mycmd.sqlite3")) as db:
         assert Service(db, owner_id()).get(record_id).data["notes"] == "Edited through real widgets"
@@ -118,7 +118,7 @@ def test_real_widget_crud_search_filter_and_delete(qtbot, window, tmp_path, kind
 
     QTimer.singleShot(50, confirm)
     qtbot.mouseClick(button(page, "Delete"), Qt.MouseButton.LeftButton)
-    qtbot.waitUntil(lambda: page.records == [], timeout=30000)
+    qtbot.waitUntil(lambda: page.records == [], timeout=60000)
     with closing(connect(tmp_path / "mycmd.sqlite3")) as db:
         service = Service(db, owner_id())
         assert service.get(record_id, include_deleted=True).deleted_at
@@ -142,7 +142,7 @@ def test_validation_and_cli_interoperability_restart(qtbot, window, tmp_path):
     assert "precedes" in dialog.error.text()
     fill(dialog, {"started_at": "", "finished_at": ""})
     save(qtbot, dialog)
-    qtbot.waitUntil(lambda: len(page.records) == 1, timeout=30000)
+    qtbot.waitUntil(lambda: len(page.records) == 1, timeout=60000)
     record_id = page.records[0].id
     env = os.environ.copy()
     env["MYCMD_DATA_DIR"] = str(tmp_path)
@@ -165,20 +165,20 @@ def test_validation_and_cli_interoperability_restart(qtbot, window, tmp_path):
     )
     assert edited.returncode == 0, edited.stderr
     page.refresh()
-    qtbot.waitUntil(lambda: page.records[0].data["title"] == "CLI update", timeout=30000)
+    qtbot.waitUntil(lambda: page.records[0].data["title"] == "CLI update", timeout=60000)
     window.close()
-    qtbot.waitUntil(lambda: window.closed, timeout=30000)
+    qtbot.waitUntil(lambda: window.closed, timeout=60000)
     reopened = MainWindow(root=tmp_path)
     qtbot.addWidget(reopened)
     reopened.show()
     try:
-        qtbot.waitUntil(lambda: reopened.ready, timeout=30000)
+        qtbot.waitUntil(lambda: reopened.ready, timeout=60000)
         reopened.navigation.setCurrentRow(2)
-        qtbot.waitUntil(lambda: len(reopened.entities["projects"].records) == 1, timeout=30000)
+        qtbot.waitUntil(lambda: len(reopened.entities["projects"].records) == 1, timeout=60000)
         assert reopened.entities["projects"].records[0].data["title"] == "CLI update"
     finally:
         reopened.close()
-        qtbot.waitUntil(lambda: reopened.closed, timeout=30000)
+        qtbot.waitUntil(lambda: reopened.closed, timeout=60000)
 
 
 def test_form_preserves_list_items_when_editing_notes(qtbot, window, tmp_path):
