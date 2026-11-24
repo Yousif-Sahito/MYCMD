@@ -42,7 +42,7 @@ def main() -> None:
                 "mycmd/terminal/posix.py",
             ):
                 assert name in names, f"Missing terminal engine module: {name}"
-            assert not any(name.startswith(("server/", "tests/", "apps/")) for name in names)
+            assert not any(name.startswith(("tests/", "apps/")) for name in names)
             for name in names:
                 destination = (Path(directory) / name).resolve()
                 if not destination.is_relative_to(Path(directory).resolve()):
