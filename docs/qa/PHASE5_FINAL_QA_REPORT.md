@@ -1,6 +1,6 @@
 # MYCMD 2.0 - Phase 5 verification report
 
-STATUS: IN PROGRESS - implementation and local frontend gates complete
+STATUS: VERIFIED
 
 ## Implemented website
 
@@ -42,12 +42,20 @@ credentials, real achievements or invented resume/contact details are published.
 
 ## CI
 
-The first exact-SHA Phase 5 run is pending. The workflow preserves existing Python
-gates and adds a Windows/Ubuntu frontend matrix for locked install, typecheck,
-ESLint, unit tests, build and Playwright.
+Exact-SHA Phase 5 GitHub Actions run `45298690921` passed:
+
+- Windows Python gate: PASS.
+- Ubuntu Python gate: PASS.
+- Windows portfolio gate: PASS.
+- Ubuntu portfolio gate: PASS.
+
+Run: https://github.com/Yousif-Sahito/MYCMD/actions/runs/45298690921
+
+The workflow preserves existing Python gates and adds a Windows/Ubuntu frontend
+matrix for locked install, typecheck, ESLint, unit tests, build and Playwright.
 
 ## Remaining limitations
 
 - No live deployment is claimed.
 - No direct Kali or native screen-reader session is claimed.
-- Final CI, specialist review dispositions and release commit must be recorded.
+- Final documentation commit will receive its own CI verification.

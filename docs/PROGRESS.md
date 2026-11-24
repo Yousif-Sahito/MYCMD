@@ -19,8 +19,8 @@ Local frontend evidence:
 - Eight specialist review responsibilities completed; no unresolved CRITICAL or HIGH
   security findings.
 
-Cross-platform exact-SHA CI and final Phase 5 documentation commit remain to be
-recorded after implementation push.
+Exact-SHA Windows and Ubuntu CI passed for both the Python and portfolio jobs in
+run `45298690921` at code SHA `7e67adbf79c112b0e36ceb31d453e4e9666278dc`.
 
 # Phase 3 — local terminal engine (verified)
 
