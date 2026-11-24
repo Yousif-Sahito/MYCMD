@@ -46,3 +46,7 @@ run `45298690921` passed all four matrix jobs.
 - Logout verifies the refresh session belongs to the authenticated user.
 - Bootstrap remains application-level and needs a singleton invariant before real multi-owner release.
 - Real MySQL and migration results remain BLOCKED locally until a disposable URL/CI job executes.
+## Final Phase 6 disposition
+
+Exact-SHA run `45347902966` passed the MySQL job, both Python jobs and both
+portfolio jobs. No unresolved CRITICAL or HIGH Phase 6 findings remain.

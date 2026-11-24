@@ -14,8 +14,9 @@ Local verification:
 - Source and clean-installed-wheel API smoke: passed.
 - sdist/wheel build: passed; wheel includes `src/mycmd` and `server`.
 
-Real MySQL migration/API integration and exact-SHA Windows/Ubuntu CI remain blocked
-until the service-container job executes successfully.
+Exact-SHA Windows, Ubuntu, portfolio and MySQL CI passed in run
+`45347902966` at SHA `6907b7a3c4264c2afca5fe78ea30af994a36f5f9`.
+The MySQL job ran Alembic migration 001 and real MySQL/API tests successfully.
 
 # Phase 5 — public portfolio implementation
 
