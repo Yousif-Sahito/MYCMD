@@ -168,7 +168,11 @@ def main() -> int:
         results.append(result)
         print(f"{stage}: {results[-1].status}", flush=True)
     wheels = list((output / "dist").glob("*.whl"))
-    if results[-1].status == "PASS" and len(wheels) == 1:
+    build_result = next(
+        (item for item in results if item.stage == "L-build"),
+        None,
+    )
+    if build_result is not None and build_result.status == "PASS" and len(wheels) == 1:
         for stage, script in (
             ("M-wheel", "scripts/qa/check_gui_wheel.py"),
             ("N-installed", "scripts/qa/check_installed_gui.py"),
