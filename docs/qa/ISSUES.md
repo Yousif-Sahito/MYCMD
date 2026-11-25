@@ -67,9 +67,9 @@ CI run `45459313500`.
 No unresolved CRITICAL or HIGH Phase 7 findings remain. Kali-specific validation remains
 unverified and must not be represented as direct Kali compatibility evidence.
 
-## Phase 8 in progress
+## Final Phase 8 disposition
 
 The Phase 8 baseline added executable backup, restore-failure and 10,000-record
-performance coverage. It is not complete until repository-wide lint, CI,
-dependency scanning, failure injection, restore rehearsal and platform evidence
-are resolved and documented.
+performance coverage. Repository-wide lint, strict mypy, dependency audit,
+local tests, offline build and exact-SHA Windows, Ubuntu, portfolio and MySQL
+CI are passing. Kali-specific GUI/terminal verification remains unperformed.

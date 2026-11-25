@@ -1,9 +1,9 @@
 # MYCMD 2.0 - Phase 8 verification report
 
-STATUS: IN PROGRESS
+STATUS: VERIFIED
 
-Phase 8 hardening work has started from the verified Phase 7 exact-SHA baseline.
-No Phase 8 completion or release claim is made.
+Phase 8 hardening implementation and exact-SHA Windows, Ubuntu, portfolio, and
+MySQL CI verification passed.
 
 ## Implemented in the current hardening increment
 
@@ -30,6 +30,12 @@ No Phase 8 completion or release claim is made.
 - Final Ruff format/lint: passed.
 - Final strict mypy: passed for 44 source files.
 - Updated locked dependencies: `cryptography==50.0.2`, `pytest==9.2.0`.
+- Exact-SHA implementation CI: run `45682825109`, SHA
+  `c3961f2da9bc3a955eb6ddd0456bff6cd858d558`, passed Windows and Ubuntu Python,
+  both portfolio jobs, and MySQL.
+- Final documentation exact-SHA CI: run `45682979052`, SHA
+  `6ae293cc9a4e09fb9087727a3b0f7c7278fca392`, passed Windows and Ubuntu Python,
+  both portfolio jobs, and MySQL.
 
 ## Local limitations and blockers
 
@@ -38,5 +44,4 @@ No Phase 8 completion or release claim is made.
   aggregate crash is not currently classified as an application assertion failure.
 - The direct `python -m build --no-isolation` check lacks Hatchling in the active
   environment. The isolated offline `uv build --offline` gate passed.
-- No exact-SHA GitHub Actions run or Kali desktop run has been completed for this
-  Phase 8 increment.
+- Kali-specific desktop and terminal verification remains unperformed.
