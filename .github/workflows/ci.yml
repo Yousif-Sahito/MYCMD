@@ -22,7 +22,7 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y xvfb libegl1 libopengl0 libxcb-cursor0 libxcb1 libx11-xcb1 libxcb-util1 libxcb-keysyms1 libxcb-image0 libxcb-shm0 libxcb-icccm4 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libnss3 libasound2t64 libgtk-3-0
       - run: uv lock --check
-      - run: uv sync --frozen --extra dev --extra gui --extra server
+      - run: uv sync --frozen --extra dev --extra gui --extra packaging --extra server
       - run: uv pip check
       - name: Windows full quality gates
         if: runner.os == 'Windows'

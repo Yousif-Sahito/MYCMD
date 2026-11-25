@@ -30,3 +30,5 @@ verification are complete.
 - Ubuntu/Linux PyInstaller build and clean-install smoke require exact-SHA CI.
 - A clean Windows machine without development dependencies has not been verified
   outside the current development environment.
+- Initial exact-SHA CI exposed a missing `packaging` extra in both Python quality
+  gate environments; the workflow now syncs that extra before PyInstaller execution.
