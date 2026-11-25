@@ -123,3 +123,19 @@ def test_invalid_data_directory_has_plain_error(tmp_path):
     assert result.stderr.startswith("Error:")
     assert "Traceback" not in result.stderr
     assert "\x1b[" not in result.stderr
+
+
+def test_backup_create_verify_and_restore_workflows(tmp_path):
+    root = tmp_path / "data"
+    root.mkdir()
+    added = run_cli(root, "projects", "add", input_text="backup-project\nBackup project\nactive\n")
+    assert added.returncode == 0, added.stderr
+
+    backup = tmp_path / "snapshot.sqlite3"
+    created = run_cli(root, "backup", "create", "--output", str(backup))
+    assert created.returncode == 0, created.stderr
+    verified = run_cli(root, "backup", "verify", str(backup))
+    assert verified.returncode == 0, verified.stderr
+
+    dry_run = run_cli(root, "backup", "restore", str(backup), "--dry-run")
+    assert dry_run.returncode == 0, dry_run.stderr

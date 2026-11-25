@@ -66,3 +66,10 @@ Final documentation SHA `d24c1a206821ca2e1acd6a884f7a0c250d43bbd6` passed its ex
 CI run `45459313500`.
 No unresolved CRITICAL or HIGH Phase 7 findings remain. Kali-specific validation remains
 unverified and must not be represented as direct Kali compatibility evidence.
+
+## Phase 8 in progress
+
+The Phase 8 baseline added executable backup, restore-failure and 10,000-record
+performance coverage. It is not complete until repository-wide lint, CI,
+dependency scanning, failure injection, restore rehearsal and platform evidence
+are resolved and documented.

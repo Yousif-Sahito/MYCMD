@@ -1,15 +1,26 @@
 """MYCMD command line interface."""
 
+import json
 import os
 import sqlite3
 from collections.abc import Iterable
+from pathlib import Path
 from typing import Annotated, NoReturn
 from uuid import UUID
 
 os.environ.setdefault("TYPER_USE_RICH", "0")
 import typer
 
-from mycmd.config import data_directory
+from mycmd.config import data_directory, owner_id
+from mycmd.core.backup import (
+    _manifest_path,
+    create_sqlite_backup,
+    decrypt_sqlite_backup,
+    encrypt_sqlite_backup,
+    restore_sqlite_backup,
+    verify_encrypted_sqlite_backup,
+    verify_sqlite_backup,
+)
 from mycmd.core.models import FIELDS, Record, ValidationError
 from mycmd.core.service import ConflictError, NotFoundError, Service
 from mycmd.storage.database import connect
@@ -295,3 +306,137 @@ def conflicts_resolve(
 
 
 app.add_typer(conflicts_app, name="conflicts")
+
+
+backup_app = typer.Typer(
+    help="Create, verify and restore local SQLite backups.",
+    add_completion=False,
+    rich_markup_mode=None,
+    pretty_exceptions_enable=False,
+)
+
+
+@backup_app.command("create")
+def backup_create(
+    output: str = typer.Option(..., "--output"),
+    encrypt: bool = typer.Option(False, "--encrypt"),
+    password_env: str = typer.Option("MYCMD_BACKUP_PASSWORD", "--password-env"),
+) -> None:
+    root = data_directory()
+    live = root / "mycmd.sqlite3"
+    if not live.is_file():
+        fail(f"Local database does not exist at {live}", 3)
+    backup_path = Path(output).expanduser()
+    try:
+        if encrypt:
+            password = os.environ.get(password_env)
+            if not password:
+                fail(f"Set {password_env} before creating an encrypted backup", 3)
+            temp = backup_path.with_suffix(backup_path.suffix + ".sqlite")
+            try:
+                create_sqlite_backup(live, temp, owner_id=owner_id())
+                encrypt_sqlite_backup(
+                    temp,
+                    backup_path,
+                    password=password,
+                    owner_id=owner_id(),
+                )
+            finally:
+                temp.unlink(missing_ok=True)
+                _manifest_path(temp).unlink(missing_ok=True)
+            typer.echo(f"Created encrypted backup {backup_path}")
+        else:
+            create_sqlite_backup(live, backup_path, owner_id=owner_id())
+            typer.echo(f"Created backup {backup_path}")
+    except (OSError, ValueError, RuntimeError, sqlite3.Error) as exc:
+        fail(str(exc), 3)
+
+
+@backup_app.command("list")
+def backup_list(directory: str = typer.Option(".", "--directory")) -> None:
+    root = Path(directory).expanduser()
+    manifests = sorted(root.glob("*.manifest.json"))
+    if not manifests:
+        typer.echo("No backups found")
+        return
+    for manifest_path in manifests:
+        typer.echo(str(manifest_path.with_suffix("").with_suffix("")))
+
+
+@backup_app.command("verify")
+def backup_verify(
+    backup: str = typer.Argument(...),
+    password_env: str | None = typer.Option(None, "--password-env"),
+) -> None:
+    backup_path = Path(backup).expanduser()
+    manifest_path = _manifest_path(backup_path)
+    try:
+        if manifest_path.is_file():
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if manifest.get("encrypted"):
+                password = os.environ.get(password_env or "MYCMD_BACKUP_PASSWORD")
+                if not password:
+                    fail("Set MYCMD_BACKUP_PASSWORD before verifying an encrypted backup", 3)
+                verify_encrypted_sqlite_backup(
+                    backup_path,
+                    password=password,
+                    owner_id=owner_id(),
+                )
+            else:
+                verify_sqlite_backup(backup_path, owner_id=owner_id())
+        else:
+            raise ValidationError("Backup manifest does not exist")
+        typer.echo(f"Verified backup {backup_path}")
+    except (OSError, ValueError, ValidationError) as exc:
+        fail(str(exc), 3)
+
+
+@backup_app.command("restore")
+def backup_restore(
+    backup: str = typer.Argument(...),
+    dry_run: bool = typer.Option(False, "--dry-run"),
+    confirm: bool = typer.Option(False, "--confirm"),
+    password_env: str | None = typer.Option(None, "--password-env"),
+) -> None:
+    if not dry_run and not confirm:
+        fail("Restore requires --confirm or use --dry-run", 4)
+    root = data_directory()
+    live = root / "mycmd.sqlite3"
+    backup_path = Path(backup).expanduser()
+    decrypted: Path | None = None
+    try:
+        manifest_path = _manifest_path(backup_path)
+        if manifest_path.is_file():
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if manifest.get("encrypted"):
+                password = os.environ.get(password_env or "MYCMD_BACKUP_PASSWORD")
+                if not password:
+                    fail("Set MYCMD_BACKUP_PASSWORD before restoring an encrypted backup", 3)
+                decrypted = backup_path.with_suffix(backup_path.suffix + ".decrypted")
+                decrypt_sqlite_backup(
+                    backup_path,
+                    decrypted,
+                    password=password,
+                    owner_id=owner_id(),
+                )
+                backup_path = decrypted
+        report = restore_sqlite_backup(
+            live,
+            backup_path,
+            owner_id=owner_id(),
+            dry_run=dry_run,
+        )
+        typer.echo(
+            f"Restore {report['status']}: "
+            f"{report.get('records', 0)} records, "
+            f"{report.get('pending_operations', 0)} pending operations"
+        )
+    except (OSError, ValueError, ValidationError, sqlite3.Error) as exc:
+        fail(str(exc), 3)
+    finally:
+        if decrypted is not None:
+            decrypted.unlink(missing_ok=True)
+            _manifest_path(decrypted).unlink(missing_ok=True)
+
+
+app.add_typer(backup_app, name="backup")
