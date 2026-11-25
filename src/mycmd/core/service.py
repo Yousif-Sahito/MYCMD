@@ -23,9 +23,18 @@ def now() -> str:
 
 
 def decode(row: sqlite3.Row) -> Record:
-    values = dict(row)
-    values["data"] = json.loads(values["data"])
-    return Record(**values)
+    return Record(
+        row["id"],
+        row["owner_id"],
+        row["kind"],
+        json.loads(row["data"]),
+        row["created_at"],
+        row["updated_at"],
+        row["version"],
+        row["deleted_at"],
+        row["sync_status"],
+        row["last_server_version"],
+    )
 
 
 class Service:

@@ -3,6 +3,7 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 @dataclass(frozen=True)
@@ -27,8 +28,21 @@ class Settings:
         if environment == "production":
             if not database_url:
                 raise RuntimeError("DATABASE_URL is required in production")
+            if not database_url.startswith(("mysql+pymysql://", "mysql://")):
+                raise RuntimeError("Production DATABASE_URL must use isolated MySQL")
             if not signing_key or len(signing_key) < 32:
                 raise RuntimeError("MYCMD_SECRET_KEY must contain at least 32 characters")
+            if not bootstrap_token or len(bootstrap_token) < 16:
+                raise RuntimeError("MYCMD_BOOTSTRAP_TOKEN must contain at least 16 characters")
+            origins = [item.strip() for item in public_origin.split(",") if item.strip()]
+            if not origins:
+                raise RuntimeError("MYCMD_PUBLIC_ORIGIN cannot be empty")
+            for origin in origins:
+                parsed = urlparse(origin)
+                if parsed.scheme != "https" or not parsed.hostname:
+                    raise RuntimeError("Production public origins must use HTTPS")
+                if parsed.username or parsed.password or parsed.path not in ("", "/"):
+                    raise RuntimeError("Production public origins must be origin-only HTTPS URLs")
         if not database_url:
             database_url = "sqlite+pysqlite:///" + str(
                 Path(".tools/mycmd-phase6-test.sqlite3").resolve()

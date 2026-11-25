@@ -1,0 +1,11 @@
+{$MYCMD_PUBLIC_DOMAIN:localhost} {
+    encode zstd gzip
+    root * /srv/portfolio
+    try_files {path} /index.html
+    file_server
+
+    @api path /api/* /health /openapi.json /docs
+    handle @api {
+        reverse_proxy api:8000
+    }
+}
