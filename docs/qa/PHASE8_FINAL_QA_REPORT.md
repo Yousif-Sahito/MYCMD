@@ -40,4 +40,3 @@ No Phase 8 completion or release claim is made.
   environment. The isolated offline `uv build --offline` gate passed.
 - No exact-SHA GitHub Actions run or Kali desktop run has been completed for this
   Phase 8 increment.
-
