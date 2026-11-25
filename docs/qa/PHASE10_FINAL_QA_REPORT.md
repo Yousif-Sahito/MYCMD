@@ -1,9 +1,10 @@
 # MYCMD 2.0 - Phase 10 verification report
 
-STATUS: IN PROGRESS
+STATUS: IMPLEMENTED AND CI-VERIFIED
 
-Phase 10 deployment hardening is in progress. No production deployment or public
-HTTPS hosting claim is made until external infrastructure is supplied and verified.
+Phase 10 deployment assets are implemented and pass exact-SHA CI. No public
+production deployment, ACME certificate, disposable MySQL backup/restore or
+rollback rehearsal claim is made until external infrastructure is supplied.
 
 ## Implemented
 
@@ -23,6 +24,9 @@ HTTPS hosting claim is made until external infrastructure is supplied and verifi
 - 10,000-record list benchmark: passing after positional Record decoding optimization.
 - Strict Ruff and mypy: passing.
 - Lock and dependency audit: passing with no known vulnerabilities.
+- Exact-SHA CI: run `45696421788`, SHA
+  `b3edbe9a58d206adb4028ef08a3090a2db074f2f`, passed Windows and Ubuntu Python,
+  both portfolio jobs, MySQL migrations and API tests.
 
 ## Remaining blockers
 

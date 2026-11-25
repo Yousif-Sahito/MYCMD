@@ -81,9 +81,10 @@ exact-SHA CI. A real Windows `MYCMD.exe` build completed and stayed alive for a
 12-second offscreen GUI smoke. Direct Kali installer and clean-machine verification
 remain pending.
 
-## Phase 10 deployment in progress
+## Phase 10 deployment disposition
 
 Production configuration now rejects SQLite and HTTP public origins. Deployment
 Docker/Caddy assets and encrypted MySQL backup/migration rehearsal helpers are
-implemented, but public DNS/ACME, real disposable MySQL backup/restore and
-Docker hosting evidence remain external blockers. No public deployment claim is made.
+implemented. Exact-SHA run `45696421788` passed Windows, Ubuntu, portfolio and
+MySQL CI. Public DNS/ACME, real disposable MySQL backup/restore and Docker hosting
+evidence remain external blockers. No public deployment claim is made.
