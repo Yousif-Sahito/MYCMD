@@ -73,3 +73,9 @@ The Phase 8 baseline added executable backup, restore-failure and 10,000-record
 performance coverage. Repository-wide lint, strict mypy, dependency audit,
 local tests, offline build and exact-SHA Windows, Ubuntu, portfolio and MySQL
 CI are passing. Kali-specific GUI/terminal verification remains unperformed.
+
+## Phase 9 packaging
+
+PyInstaller OS-specific desktop executable support is in progress. A real Windows
+`MYCMD.exe` build completed and stayed alive for a 12-second offscreen GUI smoke.
+Direct Kali installer and clean-machine verification remain pending.

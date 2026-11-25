@@ -136,6 +136,10 @@ def main() -> int:
         ("K-security", pytest + ["tests/gui", "-k", "security"]),
         ("K-full-suite", pytest + ["tests"]),
         ("L-build", [args.uv, "build", "--out-dir", str(output / "dist")]),
+        (
+            "X-packaging",
+            [python, "scripts/build_installer.py", "--output", str(output / "dist-phase9")],
+        ),
         ("P-frontend-deps", [npm, "ci", "--prefix", "apps/portfolio"]),
         ("Q-frontend-types", [npm, "run", "typecheck", "--prefix", "apps/portfolio"]),
         ("R-frontend-lint", [npm, "run", "lint", "--prefix", "apps/portfolio"]),

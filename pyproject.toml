@@ -31,6 +31,9 @@ gui = [
     "pyside6>=6.8,<7",
     "pytest-qt>=4.4,<5",
 ]
+packaging = [
+    "pyinstaller>=6.16,<7",
+]
 server = [
     "alembic>=1.17,<2",
     "argon2-cffi>=25.1,<26",
@@ -58,7 +61,7 @@ markers = [
 [tool.ruff]
 target-version = "py313"
 line-length = 100
-extend-exclude = [".tools"]
+extend-exclude = [".tools", "*.spec"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
