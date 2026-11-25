@@ -76,6 +76,7 @@ CI are passing. Kali-specific GUI/terminal verification remains unperformed.
 
 ## Phase 9 packaging
 
-PyInstaller OS-specific desktop executable support is in progress. A real Windows
-`MYCMD.exe` build completed and stayed alive for a 12-second offscreen GUI smoke.
-Direct Kali installer and clean-machine verification remain pending.
+PyInstaller OS-specific desktop executable support is verified on Windows and Ubuntu
+exact-SHA CI. A real Windows `MYCMD.exe` build completed and stayed alive for a
+12-second offscreen GUI smoke. Direct Kali installer and clean-machine verification
+remain pending.

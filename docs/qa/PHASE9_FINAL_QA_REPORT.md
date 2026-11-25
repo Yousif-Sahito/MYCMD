@@ -1,10 +1,9 @@
 # MYCMD 2.0 - Phase 9 verification report
 
-STATUS: IN PROGRESS
+STATUS: VERIFIED
 
-Phase 9 packaging implementation has begun from the verified Phase 8 baseline.
-No Phase 9 completion or release claim is made until OS artifact and exact-SHA CI
-verification are complete.
+Phase 9 packaging implementation and exact-SHA Windows and Ubuntu CI
+verification passed.
 
 ## Implemented
 
@@ -23,6 +22,10 @@ verification are complete.
 - Windows PyInstaller build: passed.
 - Real Windows GUI executable: stayed alive for 12 seconds with a temporary data
   directory under the offscreen Qt platform and was stopped by PID.
+- Exact-SHA CI: run `45689599563`, SHA
+  `86ac8a7c26b28944257a334fba06502ee7471c86`, passed Windows and Ubuntu Python,
+  both portfolio jobs and MySQL. The Windows and Ubuntu Python jobs both built
+  and uploaded packaged GUI executables.
 
 ## Limitations
 
