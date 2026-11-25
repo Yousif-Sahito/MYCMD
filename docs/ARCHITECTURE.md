@@ -34,6 +34,34 @@ The client wheel includes only `src/mycmd`; server and portfolio are separate ar
 The platform-specific `pywinpty` runtime dependency is locked only on Windows.
 Terminal integration tests exercise real commands and persistent shell state on both OSes.
 
+## Verified system diagram
+
+```mermaid
+flowchart TD
+    User[Local User] --> CLI[Typer CLI]
+    User --> GUI[PySide6 Desktop]
+
+    CLI --> Core[Shared Models and Service]
+    GUI --> Core
+    Core --> SQLite[(SQLite: Records, Outbox, Conflicts)]
+
+    GUI --> Terminal[TerminalSession]
+    Terminal --> Windows[ConPTY via PyWinpty]
+    Terminal --> POSIX[POSIX PTY]
+
+    SQLite --> Coordinator[Sync Coordinator]
+    Coordinator --> APIClient[Authenticated HTTP Client]
+    APIClient --> API[FastAPI]
+    API --> MySQL[(MySQL 8.4)]
+
+    Visitor[Public Visitor] --> Portfolio[React Static Portfolio]
+    Portfolio --> Registry[Allowlisted Command Registry]
+    Registry --> PublicData[Checked-in Public Data]
+
+    Caddy[Caddy HTTPS] --> Portfolio
+    Caddy --> API
+```
+
 ## Phase 5 public portfolio surface
 
 The public portfolio is a separate Vite/React/TypeScript application under
